@@ -1,0 +1,29 @@
+---
+description: Rules for React Native apps (apps/mobile, apps/delivery)
+globs: ["apps/mobile/**/*.{ts,tsx}", "apps/delivery/**/*.{ts,tsx}"]
+alwaysApply: false
+---
+
+# React Native / Expo rules
+
+## Routing (expo-router)
+- File-based routing under `app/`. Tabs live in `app/(tabs)/`.
+- Use `router.push()` / `router.replace()` from `expo-router` for navigation.
+- Never use `@react-navigation/native` directly — expo-router wraps it.
+
+## State
+- Zustand stores are in `src/store/`. Each store is a single `create()` call.
+- Auth tokens are stored in `expo-secure-store` via the auth store — never AsyncStorage for secrets.
+- Server state (menus, orders, restaurants) uses TanStack React Query.
+
+## Networking
+- All API calls go through the configured Axios instance in `src/lib/axios.ts`.
+- The interceptor handles JWT attachment and silent refresh — do not replicate this logic.
+
+## Platform differences
+- Use `.android.tsx` / `.ios.tsx` suffixes only when the difference is unavoidable.
+- Prefer `Platform.select()` for small differences within one file.
+
+## Cart rule
+- The cart store enforces single-restaurant items. Before adding a new item, check
+  `cartStore.restaurantId` and prompt to clear cart if it differs.

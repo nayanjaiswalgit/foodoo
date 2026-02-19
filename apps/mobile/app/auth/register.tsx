@@ -50,13 +50,52 @@ export default function RegisterScreen() {
 
           {errors.form ? <Text style={styles.formError}>{errors.form}</Text> : null}
 
-          <Input label="Full Name" placeholder="John Doe" value={form.name} onChangeText={(v) => updateField('name', v)} error={errors.name} autoCapitalize="words" />
-          <Input label="Email" placeholder="you@example.com" value={form.email} onChangeText={(v) => updateField('email', v)} keyboardType="email-address" error={errors.email} />
-          <Input label="Phone" placeholder="9876543210" value={form.phone} onChangeText={(v) => updateField('phone', v)} keyboardType="phone-pad" error={errors.phone} />
-          <Input label="Password" placeholder="Min 8 chars, 1 uppercase, 1 number" value={form.password} onChangeText={(v) => updateField('password', v)} secureTextEntry error={errors.password} />
+          <Input
+            label="Full Name"
+            placeholder="John Doe"
+            value={form.name}
+            onChangeText={(v) => updateField('name', v)}
+            error={errors.name}
+            autoCapitalize="words"
+          />
+          <Input
+            label="Email"
+            placeholder="you@example.com"
+            value={form.email}
+            onChangeText={(v) => updateField('email', v)}
+            keyboardType="email-address"
+            error={errors.email}
+          />
+          <Input
+            label="Phone"
+            placeholder="9876543210"
+            value={form.phone}
+            onChangeText={(v) => updateField('phone', v)}
+            keyboardType="phone-pad"
+            error={errors.phone}
+          />
+          <Input
+            label="Password"
+            placeholder="Min 8 chars, 1 uppercase, 1 number"
+            value={form.password}
+            onChangeText={(v) => updateField('password', v)}
+            secureTextEntry
+            error={errors.password}
+          />
 
-          <Button title="Create Account" onPress={handleRegister} loading={register.isPending} fullWidth />
-          <Button title="Already have an account? Sign In" onPress={() => router.back()} variant="ghost" fullWidth style={styles.loginBtn} />
+          <Button
+            title="Create Account"
+            onPress={handleRegister}
+            loading={register.isPending}
+            fullWidth
+          />
+          <Button
+            title="Already have an account? Sign In"
+            onPress={() => router.back()}
+            variant="ghost"
+            fullWidth
+            style={styles.loginBtn}
+          />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -70,6 +109,14 @@ const styles = StyleSheet.create({
   header: { alignItems: 'center', marginBottom: SPACING.xxxl },
   title: { fontSize: FONT_SIZE.xxl, fontWeight: '800', color: COLORS.text },
   subtitle: { fontSize: FONT_SIZE.md, color: COLORS.textSecondary, marginTop: SPACING.sm },
-  formError: { fontSize: FONT_SIZE.sm, color: COLORS.error, textAlign: 'center', marginBottom: SPACING.lg, backgroundColor: '#FFEBEE', padding: SPACING.md, borderRadius: 8 },
+  formError: {
+    fontSize: FONT_SIZE.sm,
+    color: COLORS.error,
+    textAlign: 'center',
+    marginBottom: SPACING.lg,
+    backgroundColor: '#FFEBEE',
+    padding: SPACING.md,
+    borderRadius: 8,
+  },
   loginBtn: { marginTop: SPACING.md },
 });

@@ -17,7 +17,9 @@ export const MenuItemCard = ({ item, onAdd }: MenuItemCardProps) => (
       <Text style={styles.name}>{item.name}</Text>
       <Text style={styles.price}>₹{item.price}</Text>
       {item.description ? (
-        <Text style={styles.desc} numberOfLines={2}>{item.description}</Text>
+        <Text style={styles.desc} numberOfLines={2}>
+          {item.description}
+        </Text>
       ) : null}
     </View>
     <View style={styles.imageBox}>
@@ -45,10 +47,19 @@ const styles = StyleSheet.create({
   info: { flex: 1, paddingRight: SPACING.md },
   name: { fontSize: FONT_SIZE.md, fontWeight: '600', color: COLORS.text, marginTop: SPACING.xs },
   price: { fontSize: FONT_SIZE.md, fontWeight: '700', color: COLORS.text, marginTop: 2 },
-  desc: { fontSize: FONT_SIZE.sm, color: COLORS.textSecondary, marginTop: SPACING.xs, lineHeight: 18 },
+  desc: {
+    fontSize: FONT_SIZE.sm,
+    color: COLORS.textSecondary,
+    marginTop: SPACING.xs,
+    lineHeight: 18,
+  },
   imageBox: { alignItems: 'center' },
   image: { width: 110, height: 90, borderRadius: RADIUS.md },
-  placeholder: { backgroundColor: COLORS.background, alignItems: 'center', justifyContent: 'center' },
+  placeholder: {
+    backgroundColor: COLORS.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   placeholderText: { fontSize: 32 },
   addBtn: {
     backgroundColor: COLORS.surface,

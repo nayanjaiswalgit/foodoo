@@ -1,0 +1,47 @@
+# Windsurf (Cascade) rules — food-delivery monorepo
+
+## Project structure
+pnpm workspaces + Turborepo. Five apps:
+- `apps/api`       Express + TypeScript (CommonJS), port 5000
+- `apps/mobile`    Expo 54 React Native — customer app
+- `apps/delivery`  Expo 54 React Native — delivery partner app
+- `apps/web-admin` Vite + React 19 + Tailwind v4, port 5173
+- `packages/shared` TypeScript types, Zod schemas, constants — imported as source
+
+## Code rules
+
+### TypeScript
+- Strict mode. Never `any`. Never `@ts-ignore` without a comment explaining why.
+- Always `import type` for type-only imports.
+- Roles, statuses, payment types come from `@food-delivery/shared` — never inline strings.
+
+### Backend (apps/api)
+- All business logic belongs in services (`src/services/`), not controllers.
+- Controllers use `asyncHandler` wrapper — no try/catch blocks.
+- Errors are thrown as `new ApiError(statusCode, message)`.
+- MongoDB writes that must be atomic use `findOneAndUpdate` with proper filters.
+
+### Frontend
+- Zustand stores in `src/store/` handle all client state.
+- React Query handles all server/API data fetching.
+- Never bypass the Axios instance in `src/lib/axios.ts`.
+
+### Formatting
+- Single quotes, semicolons, trailing commas (ES5 style), 100-char line width.
+- 2-space indentation, LF endings (enforced by .editorconfig + Prettier).
+
+## Commands Cascade should know
+```bash
+pnpm dev:api          # Start backend
+pnpm dev:admin        # Start web-admin
+pnpm build            # Build all packages
+pnpm exec prettier --write <file>   # Format a file
+pnpm exec eslint apps/api/src       # Lint backend
+pnpm --filter @food-delivery/web-admin lint  # Lint web-admin
+```
+
+## Do not
+- Do not add raw SQL — this project uses Mongoose (MongoDB).
+- Do not modify pnpm-lock.yaml directly.
+- Do not create new top-level config files without checking if one already exists.
+- Do not suggest test frameworks — no test setup exists yet.

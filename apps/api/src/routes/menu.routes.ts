@@ -1,5 +1,10 @@
 import { Router } from 'express';
-import { createMenuItemSchema, updateMenuItemSchema, createCategorySchema, UserRole } from '@food-delivery/shared';
+import {
+  createMenuItemSchema,
+  updateMenuItemSchema,
+  createCategorySchema,
+  UserRole,
+} from '@food-delivery/shared';
 import { validate } from '../middleware/validate.middleware';
 import { authenticate, authorize } from '../middleware/auth.middleware';
 import * as menuController from '../controllers/menu.controller';
@@ -28,6 +33,10 @@ router.patch(
   menuController.updateItem
 );
 router.delete('/:id', authorize(UserRole.RESTAURANT_OWNER), menuController.deleteItem);
-router.patch('/:id/toggle', authorize(UserRole.RESTAURANT_OWNER), menuController.toggleAvailability);
+router.patch(
+  '/:id/toggle',
+  authorize(UserRole.RESTAURANT_OWNER),
+  menuController.toggleAvailability
+);
 
 export { router as menuRoutes };

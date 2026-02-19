@@ -48,11 +48,13 @@ export default function ActiveDeliveryScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.statusCard}>
-        <Text style={styles.statusEmoji}>
-          {isOnTheWay ? '🚚' : isPickedUp ? '📦' : '🏪'}
-        </Text>
+        <Text style={styles.statusEmoji}>{isOnTheWay ? '🚚' : isPickedUp ? '📦' : '🏪'}</Text>
         <Text style={styles.statusText}>
-          {isOnTheWay ? 'On the Way to Customer' : isPickedUp ? 'Picked Up - Head to Customer' : 'Head to Restaurant for Pickup'}
+          {isOnTheWay
+            ? 'On the Way to Customer'
+            : isPickedUp
+              ? 'Picked Up - Head to Customer'
+              : 'Head to Restaurant for Pickup'}
         </Text>
       </View>
 
@@ -60,7 +62,9 @@ export default function ActiveDeliveryScreen() {
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Order #{order.orderNumber}</Text>
         {(order.items ?? []).map((item: { name: string; quantity: number }, i: number) => (
-          <Text key={i} style={styles.itemText}>{item.quantity}x {item.name}</Text>
+          <Text key={i} style={styles.itemText}>
+            {item.quantity}x {item.name}
+          </Text>
         ))}
         <View style={styles.totalRow}>
           <Text style={styles.totalLabel}>Total</Text>
@@ -152,11 +156,24 @@ const styles = StyleSheet.create({
   },
   cardTitle: { fontSize: 14, fontWeight: '700', color: '#2D3436', marginBottom: 8 },
   itemText: { fontSize: 13, color: '#636E72', marginBottom: 4 },
-  totalRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#E9ECEF' },
+  totalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#E9ECEF',
+  },
   totalLabel: { fontSize: 15, fontWeight: '700', color: '#2D3436' },
   totalValue: { fontSize: 15, fontWeight: '700', color: '#FF6B35' },
   infoText: { fontSize: 14, color: '#636E72' },
-  mapsBtn: { marginTop: 8, backgroundColor: '#E3F2FD', paddingVertical: 8, borderRadius: 8, alignItems: 'center' },
+  mapsBtn: {
+    marginTop: 8,
+    backgroundColor: '#E3F2FD',
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
   mapsBtnText: { color: '#1976D2', fontWeight: '600', fontSize: 13 },
   phoneText: { color: '#00B894', fontSize: 14, fontWeight: '600', marginTop: 4 },
   actions: { marginTop: 8 },

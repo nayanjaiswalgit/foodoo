@@ -1,5 +1,18 @@
-export { registerSchema, loginSchema, sendOtpSchema, verifyOtpSchema, refreshTokenSchema, updateProfileSchema } from './auth';
-export type { RegisterInput, LoginInput, SendOtpInput, VerifyOtpInput, UpdateProfileInput } from './auth';
+export {
+  registerSchema,
+  loginSchema,
+  sendOtpSchema,
+  verifyOtpSchema,
+  refreshTokenSchema,
+  updateProfileSchema,
+} from './auth';
+export type {
+  RegisterInput,
+  LoginInput,
+  SendOtpInput,
+  VerifyOtpInput,
+  UpdateProfileInput,
+} from './auth';
 
 export { createRestaurantSchema, updateRestaurantSchema } from './restaurant';
 export type { CreateRestaurantInput, UpdateRestaurantInput } from './restaurant';

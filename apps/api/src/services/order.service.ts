@@ -1,4 +1,10 @@
-import { type PlaceOrderInput, OrderStatus, ORDER_STATUS_FLOW, type OrderStatus as OrderStatusType, UserRole } from '@food-delivery/shared';
+import {
+  type PlaceOrderInput,
+  OrderStatus,
+  ORDER_STATUS_FLOW,
+  type OrderStatus as OrderStatusType,
+  UserRole,
+} from '@food-delivery/shared';
 import mongoose from 'mongoose';
 import { Order } from '../models/order.model';
 import { MenuItem } from '../models/menu-item.model';
@@ -11,7 +17,11 @@ import { getIO } from '../socket';
 const TAX_RATE = 0.05;
 const MAX_ORDER_ITEMS = 50;
 
-export const placeOrder = async (customerId: string, input: PlaceOrderInput, idempotencyKey?: string) => {
+export const placeOrder = async (
+  customerId: string,
+  input: PlaceOrderInput,
+  idempotencyKey?: string
+) => {
   // Idempotency: if a key is provided, check for existing order
   if (idempotencyKey) {
     const existing = await Order.findOne({ idempotencyKey, customer: customerId });
@@ -85,9 +95,7 @@ export const placeOrder = async (customerId: string, input: PlaceOrderInput, ide
   });
 
   if (subtotal < restaurant.minOrderAmount) {
-    throw ApiError.badRequest(
-      `Minimum order amount is ₹${restaurant.minOrderAmount}`
-    );
+    throw ApiError.badRequest(`Minimum order amount is ₹${restaurant.minOrderAmount}`);
   }
 
   let discount = 0;
@@ -166,11 +174,7 @@ export const placeOrder = async (customerId: string, input: PlaceOrderInput, ide
   }
 };
 
-export const getCustomerOrders = async (
-  customerId: string,
-  page: number,
-  limit: number
-) => {
+export const getCustomerOrders = async (customerId: string, page: number, limit: number) => {
   const [orders, total] = await Promise.all([
     Order.find({ customer: customerId })
       .populate('restaurant', 'name image')
@@ -257,9 +261,7 @@ export const updateStatus = async (
 
   const allowed = ORDER_STATUS_FLOW[order.status as OrderStatusType];
   if (!allowed?.includes(newStatus)) {
-    throw ApiError.badRequest(
-      `Cannot transition from ${order.status} to ${newStatus}`
-    );
+    throw ApiError.badRequest(`Cannot transition from ${order.status} to ${newStatus}`);
   }
 
   order.status = newStatus;

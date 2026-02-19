@@ -45,6 +45,11 @@ export const RestaurantCardSkeleton = () => (
 );
 
 const skeletonStyles = StyleSheet.create({
-  card: { marginBottom: 16, backgroundColor: COLORS.surface, borderRadius: RADIUS.lg, overflow: 'hidden' },
+  card: {
+    marginBottom: 16,
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
+    overflow: 'hidden',
+  },
   info: { padding: 12 },
 });

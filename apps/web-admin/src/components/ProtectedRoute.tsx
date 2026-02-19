@@ -18,7 +18,8 @@ export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
   useEffect(() => {
     // If we have a token but no user data, fetch the profile
     if (isAuthenticated && !user) {
-      adminApi.getProfile()
+      adminApi
+        .getProfile()
         .then((profileUser) => setUser(profileUser))
         .catch(() => logout());
     }

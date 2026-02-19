@@ -17,9 +17,7 @@ export const Rating = ({ average, count, size = 'md' }: RatingProps) => {
         <Text style={styles.star}>★</Text>
         <Text style={[styles.value, isSm && styles.valueSm]}>{average.toFixed(1)}</Text>
       </View>
-      {count !== undefined && (
-        <Text style={[styles.count, isSm && styles.countSm]}>({count})</Text>
-      )}
+      {count !== undefined && <Text style={[styles.count, isSm && styles.countSm]}>({count})</Text>}
     </View>
   );
 };

@@ -34,6 +34,7 @@ const hashToken = (token: string): string => {
 **Problem:** `Math.floor(100000 + Math.random() * 900000)` is not cryptographically secure. `Math.random()` uses a PRNG that can be predicted if an attacker observes enough outputs or knows the seed. Additionally, the OTP was logged to console even in production via `console.log`.
 
 **Fix Applied:**
+
 - Replaced with `crypto.randomInt(100000, 999999)` which uses the OS CSPRNG
 - Console logging now gated behind `NODE_ENV === 'development'`
 
@@ -66,6 +67,7 @@ if (user.refreshToken !== hashedIncoming) {
 **Problem:** A 6-digit OTP has 900,000 possibilities. With no attempt limit, an attacker could brute-force the OTP in minutes. The API had no rate limiting on the `/verify-otp` endpoint.
 
 **Fix Applied:**
+
 - Added `otpAttempts` field to User model (select: false)
 - Max 5 attempts per OTP. After 5 failures, OTP is invalidated
 - OTP rate limit: can't request new OTP within 60 seconds of last one
@@ -89,6 +91,7 @@ if (user.refreshToken !== hashedIncoming) {
 **Problem:** On page refresh, Zustand state resets. `isAuthenticated` becomes `false`, and the user is redirected to `/login` even though valid tokens exist in localStorage. The `hydrate()` method only returned a boolean but didn't set `isAuthenticated`.
 
 **Fix Applied:**
+
 - `hydrate()` now sets `isAuthenticated: true` when token exists
 - Added `isLoading` state to prevent flash-redirect during hydration
 - `ProtectedRoute` calls `hydrate()` on mount and shows loading spinner
@@ -141,17 +144,17 @@ const tokens = generateTokens(user._id.toString(), user.role);
 
 ## Security Findings
 
-| Finding | Severity | Status |
-|---------|----------|--------|
-| Refresh token stored plaintext in DB | 🔴 Critical | Fixed — SHA-256 hashed |
-| OTP uses Math.random() | 🔴 Critical | Fixed — crypto.randomInt() |
-| No token reuse detection | 🔴 Critical | Fixed — invalidate all sessions |
-| No OTP attempt limiting | 🟠 Major | Fixed — 5 attempts max |
-| No OTP request rate limit | 🟠 Major | Fixed — 60s cooldown |
-| Role stale in JWT | 🟠 Major | Fixed — read current role on refresh |
-| OTP logged in production | 🟠 Major | Fixed — dev-only logging |
-| No rate limiting on login endpoint | 🟠 Major | Noted — requires infrastructure-level fix |
-| Refresh token in localStorage (web) | 🟡 Minor | Noted — standard SPA pattern |
+| Finding                              | Severity    | Status                                    |
+| ------------------------------------ | ----------- | ----------------------------------------- |
+| Refresh token stored plaintext in DB | 🔴 Critical | Fixed — SHA-256 hashed                    |
+| OTP uses Math.random()               | 🔴 Critical | Fixed — crypto.randomInt()                |
+| No token reuse detection             | 🔴 Critical | Fixed — invalidate all sessions           |
+| No OTP attempt limiting              | 🟠 Major    | Fixed — 5 attempts max                    |
+| No OTP request rate limit            | 🟠 Major    | Fixed — 60s cooldown                      |
+| Role stale in JWT                    | 🟠 Major    | Fixed — read current role on refresh      |
+| OTP logged in production             | 🟠 Major    | Fixed — dev-only logging                  |
+| No rate limiting on login endpoint   | 🟠 Major    | Noted — requires infrastructure-level fix |
+| Refresh token in localStorage (web)  | 🟡 Minor    | Noted — standard SPA pattern              |
 
 ---
 
@@ -164,26 +167,29 @@ const tokens = generateTokens(user._id.toString(), user.role);
 
 ## UX/UI Findings
 
-| Finding | Severity | Status |
-|---------|----------|--------|
-| Web-admin flash-redirect to login on refresh | 🟠 Major | Fixed — loading spinner during hydration |
+| Finding                                                                          | Severity   | Status                                                     |
+| -------------------------------------------------------------------------------- | ---------- | ---------------------------------------------------------- |
+| Web-admin flash-redirect to login on refresh                                     | 🟠 Major   | Fixed — loading spinner during hydration                   |
 | Login screen shows "Invalid credentials" for both wrong email and wrong password | ✅ Correct | Security best practice — don't reveal which field is wrong |
-| Register screen uses Zod for client-side validation | ✅ Good | Proper error messages per field |
-| No "forgot password" flow | 🟡 Minor | Feature gap — not a bug |
+| Register screen uses Zod for client-side validation                              | ✅ Good    | Proper error messages per field                            |
+| No "forgot password" flow                                                        | 🟡 Minor   | Feature gap — not a bug                                    |
 
 ---
 
 ## Scalability Risks
 
 ### At 10k users:
+
 - Single refresh token per user model is fine
 - OTP via console.log obviously won't work — need SMS service
 
 ### At 100k users:
+
 - Auth middleware DB lookup on every request becomes a bottleneck. Add Redis user-session cache with 30-second TTL
 - Bcrypt hashing at 250ms per call limits login throughput to ~4 req/s per core. Acceptable since login is infrequent
 
 ### At 1M users:
+
 - Need distributed session management (Redis-based refresh token storage)
 - Consider moving to asymmetric JWT (RSA/ES256) for stateless verification without shared secrets
 - Rate limiting must be infrastructure-level (API gateway/nginx) not in-process
@@ -193,6 +199,7 @@ const tokens = generateTokens(user._id.toString(), user.role);
 ## Code Fixes Applied
 
 ### Files Modified:
+
 1. `apps/api/src/services/auth.service.ts` — Hashed refresh tokens, crypto OTP, attempt limiting, rate limiting, reuse detection, current-role on refresh
 2. `apps/api/src/models/user.model.ts` — Added `otpAttempts` field
 3. `apps/web-admin/src/stores/auth.store.ts` — Added `isLoading`, proper `hydrate()` state management
@@ -202,12 +209,12 @@ const tokens = generateTokens(user._id.toString(), user.role);
 
 ## Integration Risks
 
-| Integration | Risk | Mitigation |
-|------------|------|------------|
-| Auth → All endpoints | Auth middleware DB lookup on every request | Acceptable; cache at scale |
-| Auth → Socket.IO | Socket auth uses same JWT but no refresh mechanism | Socket reconnection triggers new handshake with fresh token |
-| Auth → Web-admin | Token in localStorage XSS-accessible | Standard SPA pattern; CSP headers mitigate |
-| Refresh → Role changes | Old access token carries stale role for up to 15min | Acceptable with short JWT expiry; fixed role on refresh |
+| Integration            | Risk                                                | Mitigation                                                  |
+| ---------------------- | --------------------------------------------------- | ----------------------------------------------------------- |
+| Auth → All endpoints   | Auth middleware DB lookup on every request          | Acceptable; cache at scale                                  |
+| Auth → Socket.IO       | Socket auth uses same JWT but no refresh mechanism  | Socket reconnection triggers new handshake with fresh token |
+| Auth → Web-admin       | Token in localStorage XSS-accessible                | Standard SPA pattern; CSP headers mitigate                  |
+| Refresh → Role changes | Old access token carries stale role for up to 15min | Acceptable with short JWT expiry; fixed role on refresh     |
 
 ---
 
@@ -216,6 +223,7 @@ const tokens = generateTokens(user._id.toString(), user.role);
 **⚠️ Risky**
 
 Critical security issues are fixed, but:
+
 1. No rate limiting on login/register endpoints (requires infrastructure)
 2. No SMS service integration for OTP (still console.log in dev)
 3. Refresh token in localStorage on web-admin (XSS risk without CSP)

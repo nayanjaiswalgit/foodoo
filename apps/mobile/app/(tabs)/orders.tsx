@@ -21,12 +21,7 @@ export default function OrdersScreen() {
   const renderItem = ({ item }: { item: IOrder }) => <OrderCard order={item} />;
 
   if (!isLoading && orders.length === 0) {
-    return (
-      <EmptyState
-        title="No orders yet"
-        message="Your order history will appear here"
-      />
-    );
+    return <EmptyState title="No orders yet" message="Your order history will appear here" />;
   }
 
   return (

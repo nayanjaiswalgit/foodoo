@@ -5,19 +5,21 @@
 Original audit found **32 items**. After this fix pass, **27 items were fixed**. **5 items remain** as noted enhancements (not blockers).
 
 | Severity | Original | Fixed | Remaining |
-|----------|----------|-------|-----------|
-| CRITICAL | 1 | 1 | 0 |
-| MAJOR | 12 | 12 | 0 |
-| MINOR | 19 | 14 | 5 |
+| -------- | -------- | ----- | --------- |
+| CRITICAL | 1        | 1     | 0         |
+| MAJOR    | 12       | 12    | 0         |
+| MINOR    | 19       | 14    | 5         |
 
 ---
 
 ## Fixed Items
 
 ### CRITICAL (1/1 Fixed)
+
 - **NEW-10**: Non-COD payments disabled in UI ("Coming Soon") + backend rejects non-COD + tautological payment status fixed
 
 ### MAJOR (12/12 Fixed)
+
 - **AUTH-N1/ORDER-N1**: Rate limiting added (express-rate-limit on auth, OTP, orders, global API)
 - **AUTH-N4**: Noted — SMS service is infrastructure, but OTP console.log behavior unchanged (requires Twilio/SMS provider)
 - **ORDER-N2**: Socket events now emitted on order status update via getIO()
@@ -30,6 +32,7 @@ Original audit found **32 items**. After this fix pass, **27 items were fixed**.
 - **DELIVERY-N2**: Noted — push notifications require Expo Push/FCM infrastructure setup
 
 ### MINOR (14/19 Fixed)
+
 - **MENU-N2**: Owner PII stripped from public restaurant API (only `name` populated)
 - **MENU-N3**: Menu query now has pagination with capped limit (200)
 - **NEW-5**: Profile update route now has Zod validation (updateProfileSchema)
@@ -53,26 +56,32 @@ Original audit found **32 items**. After this fix pass, **27 items were fixed**.
 These are feature enhancements that require infrastructure/architectural decisions, not code bugs:
 
 ### AUTH-N2: Refresh Token in localStorage (XSS Surface)
+
 **Severity:** MINOR | **Category:** Security
 Migration to httpOnly cookies requires backend cookie-based auth flow refactor.
 
 ### AUTH-N3: No "Forgot Password" Flow
+
 **Severity:** MINOR | **Category:** Feature Gap
 OTP infrastructure exists but needs a dedicated reset flow.
 
 ### ORDER-N3: No Per-User Coupon Usage Tracking
+
 **Severity:** MINOR | **Category:** Data Integrity
 Needs a UserCoupon join collection or usedBy array — schema change.
 
 ### ORDER-N4: No Address Selection UI in Cart
+
 **Severity:** MINOR | **Category:** UX
 Cart uses default address. A picker to select from multiple addresses would improve UX.
 
 ### ADMIN-N1: No Audit Log for Admin Actions
+
 **Severity:** MINOR | **Category:** Compliance
 Needs a new AuditLog model and middleware — architectural decision.
 
 ### DELIVERY-N1: Earnings Breakdown Fields Are Fictional
+
 **Severity:** MINOR | **Category:** Feature Gap
 Backend has no model for base pay, tips, distance bonus. Needs earnings model design.
 
@@ -81,6 +90,7 @@ Backend has no model for base pay, tips, distance bonus. Needs earnings model de
 ## Files Modified in This Fix Pass
 
 ### Backend (apps/api)
+
 1. `src/app.ts` — Global API rate limiter
 2. `src/middleware/rate-limit.middleware.ts` — **NEW** Rate limit configs
 3. `src/routes/auth.routes.ts` — Auth/OTP rate limiters
@@ -97,14 +107,17 @@ Backend has no model for base pay, tips, distance bonus. Needs earnings model de
 14. `src/models/order.model.ts` — createdAt + 2dsphere indexes
 
 ### Shared (packages/shared)
+
 15. `src/validators/auth.ts` — updateProfileSchema
 16. `src/validators/index.ts` — Export updateProfileSchema
 
 ### Web Admin (apps/web-admin)
+
 17. `src/pages/MenuPage.tsx` — updateMutation for edit
 18. `src/pages/UsersPage.tsx` — Deactivation confirmation dialog
 
 ### Mobile (apps/mobile)
+
 19. `app/cart/index.tsx` — Payment method selector UI with "Coming Soon"
 20. `app/address/index.tsx` — Loading state, error handling, "Add Address" button
 21. `app/address/add.tsx` — **NEW** Add address form screen
@@ -113,4 +126,5 @@ Backend has no model for base pay, tips, distance bonus. Needs earnings model de
 24. `app/(tabs)/search.tsx` — Error state handling
 
 ### Delivery (apps/delivery)
+
 25. `src/hooks/use-location-tracking.ts` — In-flight dedup guard

@@ -2,8 +2,7 @@ import { type CreateAddressInput, type IAddress } from '@food-delivery/shared';
 import { apiClient } from '../lib/api-client';
 
 export const addressApi = {
-  getAll: () =>
-    apiClient.get<{ data: IAddress[] }>('/addresses').then((r) => r.data.data),
+  getAll: () => apiClient.get<{ data: IAddress[] }>('/addresses').then((r) => r.data.data),
 
   create: (data: CreateAddressInput) =>
     apiClient.post<{ data: IAddress }>('/addresses', data).then((r) => r.data.data),

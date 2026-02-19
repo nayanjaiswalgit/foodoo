@@ -24,7 +24,12 @@ export default function OrderDetailScreen() {
   const queryClient = useQueryClient();
   const { emit, on } = useSocket('orders');
 
-  const { data: order, refetch, isLoading, isError } = useQuery({
+  const {
+    data: order,
+    refetch,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['order', id],
     queryFn: () => orderApi.getById(id),
     enabled: !!id,
@@ -79,14 +84,10 @@ export default function OrderDetailScreen() {
   const restaurantName = typeof restaurantData === 'object' ? restaurantData?.name : undefined;
 
   const handleCancel = () => {
-    Alert.alert(
-      'Cancel Order',
-      'Are you sure you want to cancel this order?',
-      [
-        { text: 'No', style: 'cancel' },
-        { text: 'Yes, Cancel', style: 'destructive', onPress: () => cancelMutation.mutate() },
-      ]
-    );
+    Alert.alert('Cancel Order', 'Are you sure you want to cancel this order?', [
+      { text: 'No', style: 'cancel' },
+      { text: 'Yes, Cancel', style: 'destructive', onPress: () => cancelMutation.mutate() },
+    ]);
   };
 
   return (
@@ -96,9 +97,7 @@ export default function OrderDetailScreen() {
           <Text style={styles.orderNum}>#{order.orderNumber}</Text>
           <Badge text={order.status.replace(/_/g, ' ').toUpperCase()} />
         </View>
-        <Text style={styles.statusLabel}>
-          {STATUS_LABELS[order.status] ?? order.status}
-        </Text>
+        <Text style={styles.statusLabel}>{STATUS_LABELS[order.status] ?? order.status}</Text>
       </Card>
 
       {/* Status Timeline */}
@@ -152,7 +151,9 @@ export default function OrderDetailScreen() {
         {order.pricing.discount > 0 && (
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Discount</Text>
-            <Text style={[styles.summaryValue, styles.discountValue]}>-₹{order.pricing.discount}</Text>
+            <Text style={[styles.summaryValue, styles.discountValue]}>
+              -₹{order.pricing.discount}
+            </Text>
           </View>
         )}
         <Divider />
@@ -167,8 +168,9 @@ export default function OrderDetailScreen() {
         <Text style={styles.sectionTitle}>Delivery Address</Text>
         <Text style={styles.addressText}>
           {order.deliveryAddress.addressLine1}
-          {order.deliveryAddress.addressLine2 ? `, ${order.deliveryAddress.addressLine2}` : ''}
-          , {order.deliveryAddress.city} - {order.deliveryAddress.pincode}
+          {order.deliveryAddress.addressLine2
+            ? `, ${order.deliveryAddress.addressLine2}`
+            : ''}, {order.deliveryAddress.city} - {order.deliveryAddress.pincode}
         </Text>
       </Card>
 
@@ -198,7 +200,11 @@ export default function OrderDetailScreen() {
           onPress={() =>
             router.push({
               pathname: '/review/[id]',
-              params: { id: order._id, restaurantId, restaurantName: restaurantName ?? 'Restaurant' },
+              params: {
+                id: order._id,
+                restaurantId,
+                restaurantName: restaurantName ?? 'Restaurant',
+              },
             })
           }
           fullWidth
@@ -216,15 +222,37 @@ const styles = StyleSheet.create({
   errorText: { fontSize: FONT_SIZE.md, color: COLORS.textSecondary, marginBottom: SPACING.md },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   orderNum: { fontSize: FONT_SIZE.xl, fontWeight: '800', color: COLORS.text },
-  statusLabel: { fontSize: FONT_SIZE.lg, fontWeight: '600', color: COLORS.primary, marginTop: SPACING.md },
+  statusLabel: {
+    fontSize: FONT_SIZE.lg,
+    fontWeight: '600',
+    color: COLORS.primary,
+    marginTop: SPACING.md,
+  },
   section: { marginTop: SPACING.lg },
-  sectionTitle: { fontSize: FONT_SIZE.md, fontWeight: '700', color: COLORS.text, marginBottom: SPACING.md },
+  sectionTitle: {
+    fontSize: FONT_SIZE.md,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: SPACING.md,
+  },
   timelineEntry: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: SPACING.md },
-  timelineDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: COLORS.primary, marginTop: 4, marginRight: SPACING.md },
+  timelineDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: COLORS.primary,
+    marginTop: 4,
+    marginRight: SPACING.md,
+  },
   timelineContent: { flex: 1 },
   timelineStatus: { fontSize: FONT_SIZE.sm, fontWeight: '600', color: COLORS.text },
   timelineTime: { fontSize: FONT_SIZE.xs, color: COLORS.textSecondary, marginTop: 2 },
-  timelineNote: { fontSize: FONT_SIZE.xs, color: COLORS.textSecondary, fontStyle: 'italic', marginTop: 2 },
+  timelineNote: {
+    fontSize: FONT_SIZE.xs,
+    color: COLORS.textSecondary,
+    fontStyle: 'italic',
+    marginTop: 2,
+  },
   itemRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: SPACING.sm },
   itemQty: { fontSize: FONT_SIZE.sm, fontWeight: '600', color: COLORS.primary, width: 30 },
   itemInfo: { flex: 1 },

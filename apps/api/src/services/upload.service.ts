@@ -1,10 +1,7 @@
 import { cloudinary } from '../config/cloudinary';
 import { ApiError } from '../utils/api-error';
 
-export const uploadImage = async (
-  file: Express.Multer.File,
-  folder: string
-): Promise<string> => {
+export const uploadImage = async (file: Express.Multer.File, folder: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {

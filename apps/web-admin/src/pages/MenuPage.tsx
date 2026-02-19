@@ -35,7 +35,13 @@ export function MenuPage() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: { name: string; price: number; category: string; isVeg: boolean; description: string }) =>
+    mutationFn: (data: {
+      name: string;
+      price: number;
+      category: string;
+      isVeg: boolean;
+      description: string;
+    }) =>
       restaurantApi.createMenuItem(restaurant._id, {
         ...data,
         addons: [],
@@ -50,8 +56,13 @@ export function MenuPage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: { name: string; price: number; category: string; isVeg: boolean; description: string } }) =>
-      restaurantApi.updateMenuItem(id, data),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: { name: string; price: number; category: string; isVeg: boolean; description: string };
+    }) => restaurantApi.updateMenuItem(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['menu'] });
       setShowForm(false);
@@ -66,7 +77,10 @@ export function MenuPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Menu Management</h1>
         <button
-          onClick={() => { setEditItem(null); setShowForm(!showForm); }}
+          onClick={() => {
+            setEditItem(null);
+            setShowForm(!showForm);
+          }}
           className="px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded-lg hover:bg-orange-600 transition-colors"
         >
           + Add Item
@@ -75,9 +89,7 @@ export function MenuPage() {
 
       {showForm && (
         <div className="bg-white rounded-xl border border-gray-100 p-6 mb-6">
-          <h3 className="text-lg font-semibold mb-4">
-            {editItem ? 'Edit Item' : 'Add New Item'}
-          </h3>
+          <h3 className="text-lg font-semibold mb-4">{editItem ? 'Edit Item' : 'Add New Item'}</h3>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -97,23 +109,54 @@ export function MenuPage() {
             }}
             className="grid grid-cols-2 gap-4"
           >
-            <input name="name" placeholder="Item Name" required className="px-4 py-2 border border-gray-200 rounded-lg" defaultValue={editItem?.name} />
-            <input name="price" type="number" placeholder="Price" required className="px-4 py-2 border border-gray-200 rounded-lg" defaultValue={editItem?.price} />
-            <select name="category" required className="px-4 py-2 border border-gray-200 rounded-lg">
+            <input
+              name="name"
+              placeholder="Item Name"
+              required
+              className="px-4 py-2 border border-gray-200 rounded-lg"
+              defaultValue={editItem?.name}
+            />
+            <input
+              name="price"
+              type="number"
+              placeholder="Price"
+              required
+              className="px-4 py-2 border border-gray-200 rounded-lg"
+              defaultValue={editItem?.price}
+            />
+            <select
+              name="category"
+              required
+              className="px-4 py-2 border border-gray-200 rounded-lg"
+            >
               {(categories ?? []).map((cat: { _id: string; name: string }) => (
-                <option key={cat._id} value={cat._id}>{cat.name}</option>
+                <option key={cat._id} value={cat._id}>
+                  {cat.name}
+                </option>
               ))}
             </select>
             <select name="isVeg" className="px-4 py-2 border border-gray-200 rounded-lg">
               <option value="true">Vegetarian</option>
               <option value="false">Non-Vegetarian</option>
             </select>
-            <textarea name="description" placeholder="Description" className="col-span-2 px-4 py-2 border border-gray-200 rounded-lg" defaultValue={editItem?.description} />
+            <textarea
+              name="description"
+              placeholder="Description"
+              className="col-span-2 px-4 py-2 border border-gray-200 rounded-lg"
+              defaultValue={editItem?.description}
+            />
             <div className="col-span-2 flex gap-2">
-              <button type="submit" className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
-                {(createMutation.isPending || updateMutation.isPending) ? 'Saving...' : 'Save'}
+              <button
+                type="submit"
+                className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
+              >
+                {createMutation.isPending || updateMutation.isPending ? 'Saving...' : 'Save'}
               </button>
-              <button type="button" onClick={() => setShowForm(false)} className="px-6 py-2 border border-gray-200 rounded-lg">
+              <button
+                type="button"
+                onClick={() => setShowForm(false)}
+                className="px-6 py-2 border border-gray-200 rounded-lg"
+              >
                 Cancel
               </button>
             </div>
@@ -124,7 +167,9 @@ export function MenuPage() {
       {isLoading ? (
         <div className="text-center py-12 text-gray-500">Loading menu...</div>
       ) : menuItems.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">No menu items yet. Add your first item!</div>
+        <div className="text-center py-12 text-gray-500">
+          No menu items yet. Add your first item!
+        </div>
       ) : (
         <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
           <table className="w-full text-sm">
@@ -146,7 +191,9 @@ export function MenuPage() {
                   </td>
                   <td className="px-6 py-4 font-medium">₹{item.price}</td>
                   <td className="px-6 py-4">
-                    <span className={`inline-block w-3 h-3 rounded-full ${item.isVeg ? 'bg-green-500' : 'bg-red-500'}`} />
+                    <span
+                      className={`inline-block w-3 h-3 rounded-full ${item.isVeg ? 'bg-green-500' : 'bg-red-500'}`}
+                    />
                   </td>
                   <td className="px-6 py-4">
                     <button
@@ -160,7 +207,10 @@ export function MenuPage() {
                   </td>
                   <td className="px-6 py-4 flex gap-2">
                     <button
-                      onClick={() => { setEditItem(item); setShowForm(true); }}
+                      onClick={() => {
+                        setEditItem(item);
+                        setShowForm(true);
+                      }}
                       className="text-blue-600 hover:underline text-xs"
                     >
                       Edit

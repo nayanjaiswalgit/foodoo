@@ -38,7 +38,8 @@ export default function RestaurantDetailScreen() {
     if (!menuItems) return [];
     const grouped = new Map<string, IMenuItem[]>();
     for (const item of menuItems) {
-      const cat = typeof item.category === 'object' ? (item.category as { name: string }).name : 'Other';
+      const cat =
+        typeof item.category === 'object' ? (item.category as { name: string }).name : 'Other';
       if (!grouped.has(cat)) grouped.set(cat, []);
       grouped.get(cat)!.push(item);
     }
@@ -103,7 +104,11 @@ export default function RestaurantDetailScreen() {
         )}
         ListHeaderComponent={
           <View>
-            <Image source={{ uri: restaurant.image }} style={styles.coverImage} contentFit="cover" />
+            <Image
+              source={{ uri: restaurant.image }}
+              style={styles.coverImage}
+              contentFit="cover"
+            />
             <View style={styles.info}>
               <Text style={styles.name}>{restaurant.name}</Text>
               <Text style={styles.cuisines}>{restaurant.cuisines.join(' · ')}</Text>
@@ -124,10 +129,13 @@ export default function RestaurantDetailScreen() {
                 <Card key={review._id} style={styles.reviewCard}>
                   <View style={styles.reviewHeader}>
                     <Text style={styles.reviewUser}>
-                      {typeof review.user === 'object' ? (review.user as { name: string }).name : 'Customer'}
+                      {typeof review.user === 'object'
+                        ? (review.user as { name: string }).name
+                        : 'Customer'}
                     </Text>
                     <Text style={styles.reviewStars}>
-                      {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
+                      {'★'.repeat(review.rating)}
+                      {'☆'.repeat(5 - review.rating)}
                     </Text>
                   </View>
                   <Text style={styles.reviewComment}>{review.comment}</Text>
@@ -160,7 +168,12 @@ const styles = StyleSheet.create({
   name: { fontSize: FONT_SIZE.xxl, fontWeight: '800', color: COLORS.text },
   cuisines: { fontSize: FONT_SIZE.md, color: COLORS.textSecondary, marginTop: SPACING.xs },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, marginTop: SPACING.md },
-  description: { fontSize: FONT_SIZE.sm, color: COLORS.textSecondary, marginTop: SPACING.md, lineHeight: 20 },
+  description: {
+    fontSize: FONT_SIZE.sm,
+    color: COLORS.textSecondary,
+    marginTop: SPACING.md,
+    lineHeight: 20,
+  },
   sectionTitle: {
     fontSize: FONT_SIZE.xl,
     fontWeight: '700',
@@ -184,9 +197,19 @@ const styles = StyleSheet.create({
   cartText: { color: '#FFF', fontSize: FONT_SIZE.md, fontWeight: '600' },
   cartAction: { color: '#FFF', fontSize: FONT_SIZE.md, fontWeight: '700' },
   reviewsSection: { paddingTop: SPACING.xl },
-  reviewsSectionTitle: { fontSize: FONT_SIZE.xl, fontWeight: '700', color: COLORS.text, marginBottom: SPACING.md },
+  reviewsSectionTitle: {
+    fontSize: FONT_SIZE.xl,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: SPACING.md,
+  },
   reviewCard: { marginBottom: SPACING.sm },
-  reviewHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.xs },
+  reviewHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.xs,
+  },
   reviewUser: { fontSize: FONT_SIZE.md, fontWeight: '600', color: COLORS.text },
   reviewStars: { fontSize: FONT_SIZE.md, color: COLORS.star },
   reviewComment: { fontSize: FONT_SIZE.sm, color: COLORS.textSecondary, lineHeight: 18 },

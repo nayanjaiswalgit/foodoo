@@ -7,7 +7,7 @@ export interface IUserDocument extends Document {
   email: string;
   phone: string;
   passwordHash: string;
-  role: typeof UserRole[keyof typeof UserRole];
+  role: (typeof UserRole)[keyof typeof UserRole];
   avatar?: string;
   favorites: mongoose.Types.ObjectId[];
   otp?: string;

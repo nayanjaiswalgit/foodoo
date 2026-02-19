@@ -1,5 +1,13 @@
 import React from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { type IAddress } from '@food-delivery/shared';
@@ -47,7 +55,9 @@ export default function AddressScreen() {
         )}
       </View>
       <Text style={styles.address}>{item.addressLine1}</Text>
-      <Text style={styles.city}>{item.city}, {item.state} - {item.pincode}</Text>
+      <Text style={styles.city}>
+        {item.city}, {item.state} - {item.pincode}
+      </Text>
       <View style={styles.actions}>
         {!item.isDefault && (
           <TouchableOpacity onPress={() => setDefaultMutation.mutate(item._id)}>
@@ -72,10 +82,7 @@ export default function AddressScreen() {
   if (!addresses || addresses.length === 0) {
     return (
       <View style={styles.container}>
-        <EmptyState
-          title="No addresses saved"
-          message="Add a delivery address to get started"
-        />
+        <EmptyState title="No addresses saved" message="Add a delivery address to get started" />
         <View style={styles.addBtnContainer}>
           <Button title="+ Add New Address" onPress={() => router.push('/address/add')} fullWidth />
         </View>
@@ -106,13 +113,28 @@ export default function AddressScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.background },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.background,
+  },
   list: { padding: SPACING.lg },
   addressCard: { marginBottom: SPACING.md },
   row: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, marginBottom: SPACING.sm },
-  labelBadge: { backgroundColor: COLORS.primary, paddingHorizontal: SPACING.sm, paddingVertical: 2, borderRadius: RADIUS.sm },
+  labelBadge: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: RADIUS.sm,
+  },
   labelText: { color: '#FFF', fontSize: FONT_SIZE.xs, fontWeight: '700' },
-  defaultBadge: { backgroundColor: COLORS.success, paddingHorizontal: SPACING.sm, paddingVertical: 2, borderRadius: RADIUS.sm },
+  defaultBadge: {
+    backgroundColor: COLORS.success,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: RADIUS.sm,
+  },
   defaultText: { color: '#FFF', fontSize: FONT_SIZE.xs, fontWeight: '700' },
   address: { fontSize: FONT_SIZE.md, color: COLORS.text },
   city: { fontSize: FONT_SIZE.sm, color: COLORS.textSecondary, marginTop: 2 },

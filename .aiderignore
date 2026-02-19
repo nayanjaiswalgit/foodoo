@@ -1,0 +1,34 @@
+# Aider ignore file — keeps large/irrelevant files out of aider's repo scan
+# Syntax mirrors .gitignore
+
+# Dependencies (huge, irrelevant)
+node_modules/
+
+# Build outputs
+dist/
+build/
+.expo/
+.turbo/
+
+# Mobile native build artifacts
+android/
+ios/
+
+# Lock files (not helpful for AI context)
+pnpm-lock.yaml
+*.lock
+
+# Generated type files
+*.d.ts
+
+# Media assets
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.mp4
+*.webm
+
+# Logs
+*.log

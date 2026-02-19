@@ -26,7 +26,10 @@ export function UsersPage() {
         <h1 className="text-2xl font-bold text-gray-900">Users</h1>
         <div className="flex gap-2">
           <button
-            onClick={() => { setRoleFilter(''); setPage(1); }}
+            onClick={() => {
+              setRoleFilter('');
+              setPage(1);
+            }}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium ${!roleFilter ? 'bg-orange-500 text-white' : 'bg-white border border-gray-200 text-gray-600'}`}
           >
             All
@@ -34,7 +37,10 @@ export function UsersPage() {
           {USER_ROLES.map((role) => (
             <button
               key={role}
-              onClick={() => { setRoleFilter(role); setPage(1); }}
+              onClick={() => {
+                setRoleFilter(role);
+                setPage(1);
+              }}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize ${roleFilter === role ? 'bg-orange-500 text-white' : 'bg-white border border-gray-200 text-gray-600'}`}
             >
               {role.replace(/_/g, ' ')}
@@ -70,7 +76,9 @@ export function UsersPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${user.isActive ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+                    <span
+                      className={`px-2 py-1 text-xs font-medium rounded-full ${user.isActive ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}
+                    >
                       {user.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </td>
@@ -96,9 +104,23 @@ export function UsersPage() {
 
       {data?.pagination && (
         <div className="flex justify-center gap-2 mt-6">
-          <button disabled={!data.pagination.hasPrev} onClick={() => setPage((p) => p - 1)} className="px-4 py-2 text-sm border border-gray-200 rounded-lg disabled:opacity-50">Previous</button>
-          <span className="px-4 py-2 text-sm text-gray-500">Page {data.pagination.page} of {data.pagination.totalPages}</span>
-          <button disabled={!data.pagination.hasNext} onClick={() => setPage((p) => p + 1)} className="px-4 py-2 text-sm border border-gray-200 rounded-lg disabled:opacity-50">Next</button>
+          <button
+            disabled={!data.pagination.hasPrev}
+            onClick={() => setPage((p) => p - 1)}
+            className="px-4 py-2 text-sm border border-gray-200 rounded-lg disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span className="px-4 py-2 text-sm text-gray-500">
+            Page {data.pagination.page} of {data.pagination.totalPages}
+          </span>
+          <button
+            disabled={!data.pagination.hasNext}
+            onClick={() => setPage((p) => p + 1)}
+            className="px-4 py-2 text-sm border border-gray-200 rounded-lg disabled:opacity-50"
+          >
+            Next
+          </button>
         </div>
       )}
     </div>

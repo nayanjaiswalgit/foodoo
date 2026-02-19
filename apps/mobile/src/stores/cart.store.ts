@@ -21,7 +21,12 @@ interface CartState {
   items: CartItem[];
   addItem: (restaurantId: string, restaurantName: string, item: CartItem) => boolean;
   removeItem: (menuItemId: string, variant?: string, addons?: string[]) => void;
-  updateQuantity: (menuItemId: string, quantity: number, variant?: string, addons?: string[]) => void;
+  updateQuantity: (
+    menuItemId: string,
+    quantity: number,
+    variant?: string,
+    addons?: string[]
+  ) => void;
   clearCart: () => void;
   getSubtotal: () => number;
   getItemCount: () => number;
@@ -75,9 +80,7 @@ export const useCartStore = create<CartState>((set, get) => ({
     }
     const key = cartItemKey({ menuItemId, variant, addons: addons ?? [] });
     set({
-      items: get().items.map((i) =>
-        cartItemKey(i) === key ? { ...i, quantity } : i
-      ),
+      items: get().items.map((i) => (cartItemKey(i) === key ? { ...i, quantity } : i)),
     });
   },
 

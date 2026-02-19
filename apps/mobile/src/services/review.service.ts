@@ -14,6 +14,8 @@ export const reviewApi = {
 
   getByRestaurant: (restaurantId: string, page = 1, limit = 10) =>
     apiClient
-      .get<PaginatedResponse<IReview>>(`/reviews/restaurant/${restaurantId}`, { params: { page, limit } })
+      .get<
+        PaginatedResponse<IReview>
+      >(`/reviews/restaurant/${restaurantId}`, { params: { page, limit } })
       .then((r) => r.data),
 };

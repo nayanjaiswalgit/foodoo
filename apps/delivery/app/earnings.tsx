@@ -15,7 +15,11 @@ const PERIODS: { key: Period; label: string }[] = [
 export default function EarningsScreen() {
   const [period, setPeriod] = useState<Period>('today');
 
-  const { data: earnings, isRefetching, refetch } = useQuery({
+  const {
+    data: earnings,
+    isRefetching,
+    refetch,
+  } = useQuery({
     queryKey: ['earnings'],
     queryFn: deliveryApi.getEarnings,
   });
@@ -23,20 +27,28 @@ export default function EarningsScreen() {
   const getAmount = () => {
     if (!earnings) return 0;
     switch (period) {
-      case 'today': return earnings.todayEarnings ?? 0;
-      case 'week': return earnings.weekEarnings ?? 0;
-      case 'month': return earnings.monthEarnings ?? 0;
-      case 'all': return earnings.totalEarnings ?? 0;
+      case 'today':
+        return earnings.todayEarnings ?? 0;
+      case 'week':
+        return earnings.weekEarnings ?? 0;
+      case 'month':
+        return earnings.monthEarnings ?? 0;
+      case 'all':
+        return earnings.totalEarnings ?? 0;
     }
   };
 
   const getDeliveries = () => {
     if (!earnings) return 0;
     switch (period) {
-      case 'today': return earnings.todayDeliveries ?? 0;
-      case 'week': return earnings.weekDeliveries ?? 0;
-      case 'month': return earnings.monthDeliveries ?? 0;
-      case 'all': return earnings.totalDeliveries ?? 0;
+      case 'today':
+        return earnings.todayDeliveries ?? 0;
+      case 'week':
+        return earnings.weekDeliveries ?? 0;
+      case 'month':
+        return earnings.monthDeliveries ?? 0;
+      case 'all':
+        return earnings.totalDeliveries ?? 0;
     }
   };
 
@@ -67,9 +79,7 @@ export default function EarningsScreen() {
       <View style={styles.earningsCard}>
         <Text style={styles.earningsLabel}>Total Earnings</Text>
         <Text style={styles.earningsAmount}>₹{getAmount()}</Text>
-        <Text style={styles.earningsSub}>
-          {getDeliveries()} deliveries completed
-        </Text>
+        <Text style={styles.earningsSub}>{getDeliveries()} deliveries completed</Text>
       </View>
 
       {/* Stats Grid */}
@@ -194,7 +204,13 @@ const styles = StyleSheet.create({
   },
   summaryLabel: { fontSize: 14, color: '#636E72' },
   summaryValue: { fontSize: 14, fontWeight: '600', color: '#2D3436' },
-  totalRow: { borderBottomWidth: 0, marginTop: 4, paddingTop: 14, borderTopWidth: 2, borderTopColor: '#E9ECEF' },
+  totalRow: {
+    borderBottomWidth: 0,
+    marginTop: 4,
+    paddingTop: 14,
+    borderTopWidth: 2,
+    borderTopColor: '#E9ECEF',
+  },
   totalLabel: { fontSize: 16, fontWeight: '700', color: '#2D3436' },
   totalValue: { fontSize: 16, fontWeight: '800', color: '#FF6B35' },
 });

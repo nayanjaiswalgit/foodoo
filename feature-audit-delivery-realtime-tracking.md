@@ -21,11 +21,13 @@ The atomic `findOneAndUpdate` on order acceptance is well-implemented and preven
 **File:** `apps/api/src/services/delivery.service.ts:103-122` (original)
 
 **Problem:** The `getEarnings` service returned only 4 fields:
+
 ```json
 { "totalDeliveries": 10, "totalEarnings": 500, "rating": 4.5, "todayDeliveries": 2 }
 ```
 
 The frontend earnings screen (`apps/delivery/app/earnings.tsx`) expected:
+
 ```
 todayEarnings, weekEarnings, monthEarnings, weekDeliveries, monthDeliveries,
 basePay, distanceBonus, tips, surgeBonus, avgDeliveryTime
@@ -52,13 +54,15 @@ Result: The entire earnings page showed ₹0 for all periods except "All Time" (
 **File:** `apps/delivery/app/order/[id].tsx:22-28` (original)
 
 **Problem:** The order detail query used raw `fetch()` with manual token retrieval:
+
 ```typescript
 const response = await fetch(`${API_URL}/api/orders/${id}`, {
-  headers: { Authorization: `Bearer ${await SecureStore.getItemAsync('accessToken')}` }
+  headers: { Authorization: `Bearer ${await SecureStore.getItemAsync('accessToken')}` },
 });
 ```
 
 This bypassed the configured `apiClient` which handles:
+
 - Automatic token refresh on 401
 - Request timeout
 - Error interceptors
@@ -104,50 +108,53 @@ If the access token expired, this request would fail permanently instead of trig
 
 ## Security Findings
 
-| Finding | Severity | Status |
-|---------|----------|--------|
-| All delivery routes require auth + DELIVERY_PARTNER role | ✅ Good | Route-level middleware |
-| Order acceptance uses atomic findOneAndUpdate | ✅ Good | Prevents double-accept |
-| Location coordinates not validated | 🟠 Major | Fixed |
-| Raw fetch bypasses auth interceptor | 🟠 Major | Fixed |
-| No rate limit on location updates | 🟡 Minor | 10s interval is reasonable |
+| Finding                                                  | Severity | Status                     |
+| -------------------------------------------------------- | -------- | -------------------------- |
+| All delivery routes require auth + DELIVERY_PARTNER role | ✅ Good  | Route-level middleware     |
+| Order acceptance uses atomic findOneAndUpdate            | ✅ Good  | Prevents double-accept     |
+| Location coordinates not validated                       | 🟠 Major | Fixed                      |
+| Raw fetch bypasses auth interceptor                      | 🟠 Major | Fixed                      |
+| No rate limit on location updates                        | 🟡 Minor | 10s interval is reasonable |
 
 ---
 
 ## Performance Findings
 
-| Finding | Impact | Status |
-|---------|--------|--------|
-| `getAvailableOrders` was full collection scan | High | Fixed — proximity filter with 2dsphere |
-| `getEarnings` now runs 3 parallel queries | Moderate | Acceptable — Promise.all optimizes |
-| Location update uses findOneAndUpdate | Good | Atomic, no race condition |
-| Partner 2dsphere index exists | Good | Supports geo queries |
+| Finding                                       | Impact   | Status                                 |
+| --------------------------------------------- | -------- | -------------------------------------- |
+| `getAvailableOrders` was full collection scan | High     | Fixed — proximity filter with 2dsphere |
+| `getEarnings` now runs 3 parallel queries     | Moderate | Acceptable — Promise.all optimizes     |
+| Location update uses findOneAndUpdate         | Good     | Atomic, no race condition              |
+| Partner 2dsphere index exists                 | Good     | Supports geo queries                   |
 
 ---
 
 ## UX/UI Findings
 
-| Finding | Severity | Status |
-|---------|----------|--------|
-| Earnings page showed all zeros | 🟠 Major | Fixed — proper period calculations |
-| Delivery confirmation dialog | ✅ Good | Alert before marking delivered |
-| Order acceptance confirmation | ✅ Good | Alert before accepting |
-| Open in Maps integration | ✅ Good | Google Maps deep link |
-| Customer phone call link | ✅ Good | `tel:` scheme |
-| No loading/error state on order detail | 🟡 Minor | Shows null (blank screen) |
+| Finding                                | Severity | Status                             |
+| -------------------------------------- | -------- | ---------------------------------- |
+| Earnings page showed all zeros         | 🟠 Major | Fixed — proper period calculations |
+| Delivery confirmation dialog           | ✅ Good  | Alert before marking delivered     |
+| Order acceptance confirmation          | ✅ Good  | Alert before accepting             |
+| Open in Maps integration               | ✅ Good  | Google Maps deep link              |
+| Customer phone call link               | ✅ Good  | `tel:` scheme                      |
+| No loading/error state on order detail | 🟡 Minor | Shows null (blank screen)          |
 
 ---
 
 ## Scalability Risks
 
 ### At 10k users:
+
 - Proximity-filtered orders query is efficient with 2dsphere index.
 
 ### At 100k users:
+
 - Location updates at 10s intervals = 10k writes/s for 100k online partners. Consider batching or reducing frequency to 30s for distant-from-order partners.
 - Earnings queries scan orders per partner — add compound index `{ deliveryPartner: 1, status: 1, createdAt: -1 }` (already exists).
 
 ### At 1M users:
+
 - Need Redis-based location cache for real-time proximity matching instead of MongoDB geo queries.
 - Consider a dedicated delivery-assignment service with intelligent routing.
 - Earnings should be pre-aggregated (daily/weekly summaries) not calculated on-the-fly.
@@ -157,6 +164,7 @@ If the access token expired, this request would fail permanently instead of trig
 ## Code Fixes Applied
 
 ### Files Modified:
+
 1. `apps/api/src/services/delivery.service.ts` — Coordinate validation, proximity filter, full earnings calculation
 2. `apps/delivery/app/order/[id].tsx` — Replaced raw `fetch` with `apiClient`, removed dead imports
 
@@ -164,12 +172,12 @@ If the access token expired, this request would fail permanently instead of trig
 
 ## Integration Risks
 
-| Integration | Risk | Mitigation |
-|------------|------|------------|
-| Delivery → Order status | Status transition validated by ORDER_STATUS_FLOW | Correct |
-| Location → Socket.IO | Socket broadcasts location to order room | Works independently |
-| Earnings → Order pricing | Earnings = 80% of deliveryFee | Hardcoded ratio — OK for MVP |
-| Partner availability → Order acceptance | Atomic check in findOneAndUpdate | Race-condition safe |
+| Integration                             | Risk                                             | Mitigation                   |
+| --------------------------------------- | ------------------------------------------------ | ---------------------------- |
+| Delivery → Order status                 | Status transition validated by ORDER_STATUS_FLOW | Correct                      |
+| Location → Socket.IO                    | Socket broadcasts location to order room         | Works independently          |
+| Earnings → Order pricing                | Earnings = 80% of deliveryFee                    | Hardcoded ratio — OK for MVP |
+| Partner availability → Order acceptance | Atomic check in findOneAndUpdate                 | Race-condition safe          |
 
 ---
 
@@ -178,6 +186,7 @@ If the access token expired, this request would fail permanently instead of trig
 **⚠️ Risky**
 
 Major data issues fixed (earnings zeros, global order listing). But:
+
 1. Earnings breakdown (base pay, tips, bonus) is fictional — backend has no model for it
 2. No push notifications for new orders (polling every 15s)
 3. No order assignment optimization (nearest partner routing)

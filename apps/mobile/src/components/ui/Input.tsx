@@ -64,7 +64,12 @@ export const Input = ({
 
 const styles = StyleSheet.create({
   container: { marginBottom: SPACING.lg },
-  label: { fontSize: FONT_SIZE.sm, fontWeight: '600', color: COLORS.text, marginBottom: SPACING.xs },
+  label: {
+    fontSize: FONT_SIZE.sm,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: SPACING.xs,
+  },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',

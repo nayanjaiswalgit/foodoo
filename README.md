@@ -4,16 +4,16 @@ A full-stack food delivery platform built as a **pnpm monorepo** with Turborepo.
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| **Backend** | Node.js, Express, TypeScript, MongoDB (Mongoose), Socket.IO |
-| **Mobile (Customer)** | React Native 0.81, Expo 54, expo-router, TanStack React Query, Zustand |
+| Layer                 | Technology                                                              |
+| --------------------- | ----------------------------------------------------------------------- |
+| **Backend**           | Node.js, Express, TypeScript, MongoDB (Mongoose), Socket.IO             |
+| **Mobile (Customer)** | React Native 0.81, Expo 54, expo-router, TanStack React Query, Zustand  |
 | **Mobile (Delivery)** | React Native 0.81, Expo 54, expo-router, Socket.IO, Background Location |
-| **Web Admin** | React 19, Vite, Tailwind CSS, React Router, Recharts |
-| **Shared** | TypeScript types, Zod validators, constants |
-| **Auth** | JWT (access + refresh tokens), OTP verification, RBAC |
-| **Real-time** | Socket.IO (order tracking, notifications) |
-| **Infrastructure** | Docker Compose (MongoDB 7 + Redis 7), Cloudinary (images) |
+| **Web Admin**         | React 19, Vite, Tailwind CSS, React Router, Recharts                    |
+| **Shared**            | TypeScript types, Zod validators, constants                             |
+| **Auth**              | JWT (access + refresh tokens), OTP verification, RBAC                   |
+| **Real-time**         | Socket.IO (order tracking, notifications)                               |
+| **Infrastructure**    | Docker Compose (MongoDB 7 + Redis 7), Cloudinary (images)               |
 
 ## Project Structure
 
@@ -126,83 +126,89 @@ pnpm dev
 
 ## Test Accounts
 
-| Role | Email | Password |
-|------|-------|----------|
-| Super Admin | `admin@food.dev` | `Admin@123` |
-| Restaurant Owner (Pizza) | `pizza@food.dev` | `Owner@123` |
+| Role                       | Email              | Password    |
+| -------------------------- | ------------------ | ----------- |
+| Super Admin                | `admin@food.dev`   | `Admin@123` |
+| Restaurant Owner (Pizza)   | `pizza@food.dev`   | `Owner@123` |
 | Restaurant Owner (Biryani) | `biryani@food.dev` | `Owner@123` |
-| Customer | `john@food.dev` | `User@1234` |
-| Delivery Partner | `raj@food.dev` | `Rider@123` |
+| Customer                   | `john@food.dev`    | `User@1234` |
+| Delivery Partner           | `raj@food.dev`     | `Rider@123` |
 
 ## API Endpoints
 
 ### Auth
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/register` | Register new user |
-| POST | `/api/auth/login` | Login with email/password |
-| POST | `/api/auth/send-otp` | Send OTP to phone |
-| POST | `/api/auth/verify-otp` | Verify phone OTP |
-| POST | `/api/auth/refresh-token` | Refresh JWT tokens |
-| POST | `/api/auth/logout` | Logout |
+
+| Method | Endpoint                  | Description               |
+| ------ | ------------------------- | ------------------------- |
+| POST   | `/api/auth/register`      | Register new user         |
+| POST   | `/api/auth/login`         | Login with email/password |
+| POST   | `/api/auth/send-otp`      | Send OTP to phone         |
+| POST   | `/api/auth/verify-otp`    | Verify phone OTP          |
+| POST   | `/api/auth/refresh-token` | Refresh JWT tokens        |
+| POST   | `/api/auth/logout`        | Logout                    |
 
 ### Restaurants
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/restaurants` | List with filters, pagination, geo |
-| GET | `/api/restaurants/nearby` | Find nearby restaurants |
-| GET | `/api/restaurants/:id` | Restaurant detail |
-| GET | `/api/restaurants/:id/menu` | Restaurant menu items |
-| POST | `/api/restaurants` | Register restaurant (owner) |
+
+| Method | Endpoint                    | Description                        |
+| ------ | --------------------------- | ---------------------------------- |
+| GET    | `/api/restaurants`          | List with filters, pagination, geo |
+| GET    | `/api/restaurants/nearby`   | Find nearby restaurants            |
+| GET    | `/api/restaurants/:id`      | Restaurant detail                  |
+| GET    | `/api/restaurants/:id/menu` | Restaurant menu items              |
+| POST   | `/api/restaurants`          | Register restaurant (owner)        |
 
 ### Orders
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/orders` | Place order |
-| GET | `/api/orders/my` | Customer order history |
-| GET | `/api/orders/:id` | Order detail |
-| PATCH | `/api/orders/:id/status` | Update order status |
-| POST | `/api/orders/:id/cancel` | Cancel order |
+
+| Method | Endpoint                 | Description            |
+| ------ | ------------------------ | ---------------------- |
+| POST   | `/api/orders`            | Place order            |
+| GET    | `/api/orders/my`         | Customer order history |
+| GET    | `/api/orders/:id`        | Order detail           |
+| PATCH  | `/api/orders/:id/status` | Update order status    |
+| POST   | `/api/orders/:id/cancel` | Cancel order           |
 
 ### Delivery
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| PATCH | `/api/delivery/toggle-online` | Toggle availability |
-| PATCH | `/api/delivery/location` | Update GPS location |
-| GET | `/api/delivery/available-orders` | List available orders |
-| POST | `/api/delivery/accept/:orderId` | Accept delivery |
-| POST | `/api/delivery/complete/:orderId` | Complete delivery |
-| GET | `/api/delivery/earnings` | Earnings summary |
+
+| Method | Endpoint                          | Description           |
+| ------ | --------------------------------- | --------------------- |
+| PATCH  | `/api/delivery/toggle-online`     | Toggle availability   |
+| PATCH  | `/api/delivery/location`          | Update GPS location   |
+| GET    | `/api/delivery/available-orders`  | List available orders |
+| POST   | `/api/delivery/accept/:orderId`   | Accept delivery       |
+| POST   | `/api/delivery/complete/:orderId` | Complete delivery     |
+| GET    | `/api/delivery/earnings`          | Earnings summary      |
 
 ### Reviews
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/reviews` | Submit review (customer) |
-| GET | `/api/reviews/restaurant/:id` | Restaurant reviews |
-| POST | `/api/reviews/:id/reply` | Reply to review (owner) |
+
+| Method | Endpoint                      | Description              |
+| ------ | ----------------------------- | ------------------------ |
+| POST   | `/api/reviews`                | Submit review (customer) |
+| GET    | `/api/reviews/restaurant/:id` | Restaurant reviews       |
+| POST   | `/api/reviews/:id/reply`      | Reply to review (owner)  |
 
 ### Admin
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/admin/dashboard` | Platform analytics |
-| GET | `/api/admin/users` | Manage users |
-| PATCH | `/api/admin/restaurants/:id` | Update restaurant (commission, etc.) |
-| GET/PATCH | `/api/admin/feature-flags` | Manage feature flags |
+
+| Method    | Endpoint                     | Description                          |
+| --------- | ---------------------------- | ------------------------------------ |
+| GET       | `/api/admin/dashboard`       | Platform analytics                   |
+| GET       | `/api/admin/users`           | Manage users                         |
+| PATCH     | `/api/admin/restaurants/:id` | Update restaurant (commission, etc.) |
+| GET/PATCH | `/api/admin/feature-flags`   | Manage feature flags                 |
 
 ## Database Models
 
-| Model | Description |
-|-------|-------------|
-| **User** | Customers, owners, delivery partners, admins (role-based) |
-| **Address** | User addresses with GeoJSON Points |
-| **Category** | Menu categories (Starters, Main Course, etc.) |
-| **Restaurant** | Restaurant profiles with geospatial location, ratings |
-| **MenuItem** | Menu items with variants, addons, availability |
-| **Order** | Full order lifecycle with status history, price snapshots |
-| **DeliveryPartner** | Partner profile, vehicle, location, earnings stats |
-| **Review** | Customer reviews with ratings and owner replies |
-| **Coupon** | Discount codes with usage limits and validity |
-| **FeatureFlag** | Platform-level feature toggles |
+| Model               | Description                                               |
+| ------------------- | --------------------------------------------------------- |
+| **User**            | Customers, owners, delivery partners, admins (role-based) |
+| **Address**         | User addresses with GeoJSON Points                        |
+| **Category**        | Menu categories (Starters, Main Course, etc.)             |
+| **Restaurant**      | Restaurant profiles with geospatial location, ratings     |
+| **MenuItem**        | Menu items with variants, addons, availability            |
+| **Order**           | Full order lifecycle with status history, price snapshots |
+| **DeliveryPartner** | Partner profile, vehicle, location, earnings stats        |
+| **Review**          | Customer reviews with ratings and owner replies           |
+| **Coupon**          | Discount codes with usage limits and validity             |
+| **FeatureFlag**     | Platform-level feature toggles                            |
 
 ## Architecture Decisions
 

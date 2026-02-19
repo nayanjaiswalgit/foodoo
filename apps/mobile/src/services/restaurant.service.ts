@@ -28,6 +28,5 @@ export const restaurantApi = {
   getMenu: (id: string) =>
     apiClient.get<{ data: IMenuItem[] }>(`/restaurants/${id}/menu`).then((r) => r.data.data),
 
-  toggleFavorite: (id: string) =>
-    apiClient.post(`/users/favorites/${id}`).then((r) => r.data.data),
+  toggleFavorite: (id: string) => apiClient.post(`/users/favorites/${id}`).then((r) => r.data.data),
 };

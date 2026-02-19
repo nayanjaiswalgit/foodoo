@@ -81,7 +81,8 @@ export const initSocket = (httpServer: HttpServer) => {
     socket.on('location-update', (data: { orderId: string; coordinates: [number, number] }) => {
       if (!data || typeof data.orderId !== 'string') return;
       if (!Array.isArray(data.coordinates) || data.coordinates.length !== 2) return;
-      if (typeof data.coordinates[0] !== 'number' || typeof data.coordinates[1] !== 'number') return;
+      if (typeof data.coordinates[0] !== 'number' || typeof data.coordinates[1] !== 'number')
+        return;
       orderNs.to(`order:${data.orderId}`).emit('delivery-location', {
         coordinates: data.coordinates,
       });

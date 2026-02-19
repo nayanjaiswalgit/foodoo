@@ -60,6 +60,7 @@ pnpm clean
 ### Shared Package
 
 Single source of truth for cross-app types and validation. Key exports:
+
 - `UserRole`, `OrderStatus`, `PaymentMethod`, `PaymentStatus`, `FeatureFlag` enums/constants
 - `ORDER_STATUS_FLOW` map defining valid status transitions
 - Zod schemas (used both frontend forms and backend request validation)
@@ -89,10 +90,10 @@ All routes mounted under `/api/` in `app.ts`:
 
 ## Test Accounts (from seed)
 
-| Role | Email | Password |
-|------|-------|----------|
-| Super Admin | admin@food.dev | Admin@123 |
-| Restaurant Owner | pizza@food.dev | Owner@123 |
+| Role             | Email            | Password  |
+| ---------------- | ---------------- | --------- |
+| Super Admin      | admin@food.dev   | Admin@123 |
+| Restaurant Owner | pizza@food.dev   | Owner@123 |
 | Restaurant Owner | biryani@food.dev | Owner@123 |
-| Customer | john@food.dev | User@1234 |
-| Delivery Partner | raj@food.dev | Rider@123 |
+| Customer         | john@food.dev    | User@1234 |
+| Delivery Partner | raj@food.dev     | Rider@123 |

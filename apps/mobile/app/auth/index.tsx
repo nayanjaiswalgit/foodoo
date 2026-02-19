@@ -65,12 +65,7 @@ export default function LoginScreen() {
             error={errors.password}
           />
 
-          <Button
-            title="Sign In"
-            onPress={handleLogin}
-            loading={login.isPending}
-            fullWidth
-          />
+          <Button title="Sign In" onPress={handleLogin} loading={login.isPending} fullWidth />
 
           <Button
             title="Create Account"

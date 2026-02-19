@@ -1,0 +1,19 @@
+# Aider configuration — food-delivery monorepo
+# Docs: https://aider.chat/docs/config/aider_conf.html
+
+# Always load the project conventions file as read-only context
+read:
+  - CLAUDE.md
+
+# Git settings
+auto-commits: false # Require explicit /commit — avoid accidental commits
+dirty-commits: false # Don't commit over a dirty working tree
+
+# Linting — aider will auto-lint after edits
+lint-cmd: 'pnpm exec eslint --fix'
+
+# Code style: show diffs in unified format
+dark-mode: true
+
+# Encoding hint (all source files are UTF-8 / LF)
+# aider respects .editorconfig for indentation

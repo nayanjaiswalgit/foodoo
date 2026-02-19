@@ -34,7 +34,10 @@ export const listUsers = async (page: number, limit: number, role?: string) => {
   if (role) filter.role = role;
 
   const [users, total] = await Promise.all([
-    User.find(filter).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit),
+    User.find(filter)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit),
     User.countDocuments(filter),
   ]);
   return { users, total };

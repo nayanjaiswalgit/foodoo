@@ -11,9 +11,17 @@ import { COLORS, SPACING } from '../../src/constants/theme';
 export default function FavoritesScreen() {
   const queryClient = useQueryClient();
 
-  const { data: profile, isLoading, refetch, isRefetching } = useQuery({
+  const {
+    data: profile,
+    isLoading,
+    refetch,
+    isRefetching,
+  } = useQuery({
     queryKey: ['profile'],
-    queryFn: () => apiClient.get<{ data: { favorites: IRestaurant[] } }>('/users/profile').then((r) => r.data.data),
+    queryFn: () =>
+      apiClient
+        .get<{ data: { favorites: IRestaurant[] } }>('/users/profile')
+        .then((r) => r.data.data),
   });
 
   const favorites = profile?.favorites ?? [];
@@ -27,12 +35,7 @@ export default function FavoritesScreen() {
   });
 
   if (!isLoading && favorites.length === 0) {
-    return (
-      <EmptyState
-        title="No favorites yet"
-        message="Like restaurants to see them here"
-      />
-    );
+    return <EmptyState title="No favorites yet" message="Like restaurants to see them here" />;
   }
 
   return (

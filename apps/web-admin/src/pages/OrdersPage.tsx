@@ -70,9 +70,14 @@ export function OrdersPage() {
           {STATUS_OPTIONS.map((opt) => (
             <button
               key={opt.value}
-              onClick={() => { setStatusFilter(opt.value); setPage(1); }}
+              onClick={() => {
+                setStatusFilter(opt.value);
+                setPage(1);
+              }}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                statusFilter === opt.value ? 'bg-orange-500 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                statusFilter === opt.value
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
               }`}
             >
               {opt.label}
@@ -103,25 +108,36 @@ export function OrdersPage() {
                 const status = order.status as string;
                 const nextStatus = getNextStatus(status);
                 return (
-                  <tr key={order._id as string} className="border-t border-gray-50 hover:bg-gray-50">
+                  <tr
+                    key={order._id as string}
+                    className="border-t border-gray-50 hover:bg-gray-50"
+                  >
                     <td className="px-6 py-4 font-medium">{order.orderNumber as string}</td>
-                    <td className="px-6 py-4">{(order.customer as Record<string, string>)?.name ?? 'N/A'}</td>
+                    <td className="px-6 py-4">
+                      {(order.customer as Record<string, string>)?.name ?? 'N/A'}
+                    </td>
                     <td className="px-6 py-4 text-gray-500">
                       {(order.items as Array<Record<string, unknown>>)?.length ?? 0} items
                     </td>
-                    <td className="px-6 py-4 font-medium">₹{(order.pricing as Record<string, number>)?.total ?? 0}</td>
+                    <td className="px-6 py-4 font-medium">
+                      ₹{(order.pricing as Record<string, number>)?.total ?? 0}
+                    </td>
                     <td className="px-6 py-4">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${STATUS_COLORS[status] ?? ''}`}>
+                      <span
+                        className={`px-2 py-1 text-xs font-medium rounded-full ${STATUS_COLORS[status] ?? ''}`}
+                      >
                         {status.replace(/_/g, ' ').toUpperCase()}
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       {nextStatus && (
                         <button
-                          onClick={() => updateStatusMutation.mutate({
-                            orderId: order._id as string,
-                            status: nextStatus,
-                          })}
+                          onClick={() =>
+                            updateStatusMutation.mutate({
+                              orderId: order._id as string,
+                              status: nextStatus,
+                            })
+                          }
                           className="px-3 py-1 text-xs font-medium bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
                         >
                           → {nextStatus.replace(/_/g, ' ')}

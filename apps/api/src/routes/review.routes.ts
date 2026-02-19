@@ -9,7 +9,17 @@ const router: Router = Router();
 router.get('/restaurant/:restaurantId', reviewController.getByRestaurant);
 
 router.use(authenticate);
-router.post('/', authorize(UserRole.CUSTOMER), validate(createReviewSchema), reviewController.create);
-router.post('/:id/reply', authorize(UserRole.RESTAURANT_OWNER), validate(replyReviewSchema), reviewController.reply);
+router.post(
+  '/',
+  authorize(UserRole.CUSTOMER),
+  validate(createReviewSchema),
+  reviewController.create
+);
+router.post(
+  '/:id/reply',
+  authorize(UserRole.RESTAURANT_OWNER),
+  validate(replyReviewSchema),
+  reviewController.reply
+);
 
 export { router as reviewRoutes };

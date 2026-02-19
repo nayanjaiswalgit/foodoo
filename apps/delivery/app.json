@@ -35,7 +35,9 @@
       "expo-secure-store",
       [
         "expo-location",
-        { "locationAlwaysAndWhenInUsePermission": "Allow FoodDelivery Partner to use your location for deliveries." }
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow FoodDelivery Partner to use your location for deliveries."
+        }
       ]
     ]
   }

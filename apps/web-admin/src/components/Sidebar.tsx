@@ -10,8 +10,18 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { to: '/', label: 'Dashboard', icon: '📊', roles: [UserRole.RESTAURANT_OWNER, UserRole.SUPER_ADMIN] },
-  { to: '/orders', label: 'Orders', icon: '📋', roles: [UserRole.RESTAURANT_OWNER, UserRole.SUPER_ADMIN] },
+  {
+    to: '/',
+    label: 'Dashboard',
+    icon: '📊',
+    roles: [UserRole.RESTAURANT_OWNER, UserRole.SUPER_ADMIN],
+  },
+  {
+    to: '/orders',
+    label: 'Orders',
+    icon: '📋',
+    roles: [UserRole.RESTAURANT_OWNER, UserRole.SUPER_ADMIN],
+  },
   { to: '/menu', label: 'Menu', icon: '🍕', roles: [UserRole.RESTAURANT_OWNER] },
   { to: '/reviews', label: 'Reviews', icon: '⭐', roles: [UserRole.RESTAURANT_OWNER] },
   { to: '/users', label: 'Users', icon: '👥', roles: [UserRole.SUPER_ADMIN] },
@@ -22,9 +32,7 @@ const NAV_ITEMS: NavItem[] = [
 export function Sidebar() {
   const { user, logout } = useAuthStore();
 
-  const visibleItems = NAV_ITEMS.filter(
-    (item) => user && item.roles.includes(user.role)
-  );
+  const visibleItems = NAV_ITEMS.filter((item) => user && item.roles.includes(user.role));
 
   return (
     <aside className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen fixed left-0 top-0">
@@ -43,9 +51,7 @@ export function Sidebar() {
             end={item.to === '/'}
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                isActive
-                  ? 'bg-orange-50 text-orange-600'
-                  : 'text-gray-600 hover:bg-gray-50'
+                isActive ? 'bg-orange-50 text-orange-600' : 'text-gray-600 hover:bg-gray-50'
               }`
             }
           >

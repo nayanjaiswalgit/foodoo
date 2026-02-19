@@ -28,9 +28,7 @@ export function FeatureFlagsPage() {
           {flagEntries.map(([key, enabled]) => (
             <div key={key} className="flex items-center justify-between px-6 py-4">
               <div>
-                <p className="font-medium text-gray-900 capitalize">
-                  {key.replace(/_/g, ' ')}
-                </p>
+                <p className="font-medium text-gray-900 capitalize">{key.replace(/_/g, ' ')}</p>
                 <p className="text-sm text-gray-500">{key}</p>
               </div>
               <button

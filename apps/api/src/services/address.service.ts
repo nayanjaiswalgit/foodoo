@@ -21,11 +21,9 @@ export const updateAddress = async (
   if (data.isDefault) {
     await Address.updateMany({ user: userId }, { isDefault: false });
   }
-  const address = await Address.findOneAndUpdate(
-    { _id: addressId, user: userId },
-    data,
-    { new: true }
-  );
+  const address = await Address.findOneAndUpdate({ _id: addressId, user: userId }, data, {
+    new: true,
+  });
   if (!address) throw ApiError.notFound('Address not found');
   return address;
 };

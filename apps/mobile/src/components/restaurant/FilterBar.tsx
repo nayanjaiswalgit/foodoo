@@ -11,11 +11,7 @@ interface FilterBarProps {
 
 export const FilterBar = ({ selectedCuisine, onSelectCuisine }: FilterBarProps) => (
   <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.container}>
-    <Chip
-      label="All"
-      selected={!selectedCuisine}
-      onPress={() => onSelectCuisine(null)}
-    />
+    <Chip label="All" selected={!selectedCuisine} onPress={() => onSelectCuisine(null)} />
     {CUISINES.map((cuisine) => (
       <Chip
         key={cuisine}

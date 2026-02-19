@@ -17,4 +17,7 @@ const featureFlagSchema = new Schema<IFeatureFlagDocument>(
   { timestamps: true }
 );
 
-export const FeatureFlagModel = mongoose.model<IFeatureFlagDocument>('FeatureFlag', featureFlagSchema);
+export const FeatureFlagModel = mongoose.model<IFeatureFlagDocument>(
+  'FeatureFlag',
+  featureFlagSchema
+);

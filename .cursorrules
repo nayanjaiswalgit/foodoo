@@ -1,0 +1,47 @@
+# Cursor Rules — food-delivery monorepo
+# Legacy format (still supported). For new .mdc rules see .cursor/rules/
+
+## Project overview
+pnpm workspaces + Turborepo monorepo with five packages:
+- apps/api       — Express + TypeScript, CommonJS, Node.js
+- apps/mobile    — React Native (Expo 54), expo-router, customer app
+- apps/delivery  — React Native (Expo 54), expo-router, delivery partner app
+- apps/web-admin — Vite + React 19 + Tailwind v4, browser
+- packages/shared — Pure TypeScript types, Zod schemas, enums (no runtime deps)
+
+## TypeScript rules
+- Strict mode everywhere. Never use `any` — prefer `unknown` and narrow it.
+- `noUncheckedIndexedAccess` is enabled; always guard array/object index access.
+- Use `import type` for type-only imports.
+- Never hardcode role strings or order status strings — import from `@food-delivery/shared`.
+
+## Backend (apps/api)
+- Request flow: Route → validate.middleware (Zod) → auth.middleware → Controller → Service → Model
+- Controllers only touch req/res. All business logic lives in Services.
+- Wrap async controllers with `asyncHandler` — no try/catch in controllers.
+- Always use `sendResponse(res, status, data, msg)` or `sendPaginatedResponse()`.
+- Throw `ApiError` from services on failure, never return null for errors.
+- API tsconfig is CommonJS — use `require`-style module resolution in config files.
+
+## Frontend state
+- Zustand for client state (auth, cart, location, feature flags).
+- TanStack React Query for server state (restaurants, orders, menus).
+- Axios interceptors handle JWT attachment and silent refresh — do not add manual token logic.
+- Mobile tokens live in expo-secure-store; web-admin uses localStorage.
+
+## Shared package
+- The single source of truth for cross-app types. Always update shared before app code.
+- Exported Zod schemas are used for both API validation AND frontend form validation.
+- `ORDER_STATUS_FLOW` defines valid status transitions — consult it before mutating order status.
+
+## Code style
+- Prettier config: single quotes, semicolons, trailing commas (es5), 100-char print width.
+- 2-space indent, LF line endings.
+- File names: kebab-case for utilities, PascalCase for React components.
+
+## What NOT to do
+- Do not add `console.log` to production code — use the logger or remove before committing.
+- Do not use `as any` or `@ts-ignore` without a comment explaining why.
+- Do not mix items from different restaurants in the cart store (enforced by store logic).
+- Do not commit secrets, .env files, or API keys.
+- Do not run `pnpm install` or change lockfile without user confirmation.

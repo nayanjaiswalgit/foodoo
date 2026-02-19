@@ -5,10 +5,13 @@ export const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(50),
   email: z.string().email('Invalid email address'),
   phone: z.string().regex(/^[6-9]\d{9}$/, 'Invalid Indian phone number'),
-  password: z.string().min(8, 'Password must be at least 8 characters')
+  password: z
+    .string()
+    .min(8, 'Password must be at least 8 characters')
     .regex(/[A-Z]/, 'Must contain uppercase')
     .regex(/[0-9]/, 'Must contain number'),
-  role: z.enum([UserRole.CUSTOMER, UserRole.RESTAURANT_OWNER, UserRole.DELIVERY_PARTNER])
+  role: z
+    .enum([UserRole.CUSTOMER, UserRole.RESTAURANT_OWNER, UserRole.DELIVERY_PARTNER])
     .default(UserRole.CUSTOMER),
 });
 

@@ -28,12 +28,15 @@ export const listRestaurants = asyncHandler(async (req: Request, res: Response) 
 });
 
 export const toggleRestaurantActive = asyncHandler(async (req: Request, res: Response) => {
-  const restaurant = await adminService.toggleRestaurantActive((req.params.id as string));
+  const restaurant = await adminService.toggleRestaurantActive(req.params.id as string);
   sendResponse(res, 200, restaurant);
 });
 
 export const updateCommission = asyncHandler(async (req: Request, res: Response) => {
-  const restaurant = await adminService.updateCommission((req.params.id as string), req.body.commission);
+  const restaurant = await adminService.updateCommission(
+    req.params.id as string,
+    req.body.commission
+  );
   sendResponse(res, 200, restaurant, 'Commission updated');
 });
 

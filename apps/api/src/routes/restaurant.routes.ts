@@ -10,13 +10,28 @@ router.get('/', restaurantController.list);
 router.get('/nearby', restaurantController.nearby);
 
 // Authenticated routes MUST come before /:id to prevent "owner" matching as an id param
-router.get('/owner/mine', authenticate, authorize(UserRole.RESTAURANT_OWNER), restaurantController.getOwnerRestaurant);
+router.get(
+  '/owner/mine',
+  authenticate,
+  authorize(UserRole.RESTAURANT_OWNER),
+  restaurantController.getOwnerRestaurant
+);
 
 router.get('/:id', restaurantController.getById);
 router.get('/:id/menu', restaurantController.getMenu);
 
 router.use(authenticate);
-router.post('/', authorize(UserRole.RESTAURANT_OWNER), validate(createRestaurantSchema), restaurantController.create);
-router.patch('/:id', authorize(UserRole.RESTAURANT_OWNER), validate(updateRestaurantSchema), restaurantController.update);
+router.post(
+  '/',
+  authorize(UserRole.RESTAURANT_OWNER),
+  validate(createRestaurantSchema),
+  restaurantController.create
+);
+router.patch(
+  '/:id',
+  authorize(UserRole.RESTAURANT_OWNER),
+  validate(updateRestaurantSchema),
+  restaurantController.update
+);
 
 export { router as restaurantRoutes };

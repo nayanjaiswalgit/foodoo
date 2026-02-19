@@ -1,4 +1,8 @@
-import { type CreateMenuItemInput, type UpdateMenuItemInput, type CreateCategoryInput } from '@food-delivery/shared';
+import {
+  type CreateMenuItemInput,
+  type UpdateMenuItemInput,
+  type CreateCategoryInput,
+} from '@food-delivery/shared';
 import { MenuItem } from '../models/menu-item.model';
 import { Category } from '../models/category.model';
 import { Restaurant } from '../models/restaurant.model';
@@ -15,11 +19,7 @@ export const createItem = async (
   return MenuItem.create({ ...data, restaurant: restaurantId });
 };
 
-export const updateItem = async (
-  ownerId: string,
-  itemId: string,
-  data: UpdateMenuItemInput
-) => {
+export const updateItem = async (ownerId: string, itemId: string, data: UpdateMenuItemInput) => {
   const item = await MenuItem.findById(itemId);
   if (!item) throw ApiError.notFound('Menu item not found');
 
@@ -29,7 +29,17 @@ export const updateItem = async (
   }
 
   // Only allow updating safe fields — prevent overwriting restaurant, _id, etc.
-  const allowedFields = ['name', 'description', 'price', 'category', 'isVeg', 'addons', 'variants', 'sortOrder', 'image'] as const;
+  const allowedFields = [
+    'name',
+    'description',
+    'price',
+    'category',
+    'isVeg',
+    'addons',
+    'variants',
+    'sortOrder',
+    'image',
+  ] as const;
   for (const field of allowedFields) {
     if (field in data && data[field as keyof typeof data] !== undefined) {
       (item as any)[field] = data[field as keyof typeof data];

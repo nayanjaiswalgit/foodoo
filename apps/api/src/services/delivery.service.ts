@@ -1,4 +1,8 @@
-import { OrderStatus, ORDER_STATUS_FLOW, type OrderStatus as OrderStatusType } from '@food-delivery/shared';
+import {
+  OrderStatus,
+  ORDER_STATUS_FLOW,
+  type OrderStatus as OrderStatusType,
+} from '@food-delivery/shared';
 import { DeliveryPartner } from '../models/delivery-partner.model';
 import { Order } from '../models/order.model';
 import { ApiError } from '../utils/api-error';
@@ -23,10 +27,7 @@ export const toggleOnline = async (userId: string) => {
   return partner.save();
 };
 
-export const updateLocation = async (
-  userId: string,
-  coordinates: [number, number]
-) => {
+export const updateLocation = async (userId: string, coordinates: [number, number]) => {
   // Validate coordinates
   if (
     !Array.isArray(coordinates) ||
@@ -35,8 +36,10 @@ export const updateLocation = async (
     typeof coordinates[1] !== 'number' ||
     isNaN(coordinates[0]) ||
     isNaN(coordinates[1]) ||
-    coordinates[0] < -180 || coordinates[0] > 180 ||
-    coordinates[1] < -90 || coordinates[1] > 90
+    coordinates[0] < -180 ||
+    coordinates[0] > 180 ||
+    coordinates[1] < -90 ||
+    coordinates[1] > 90
   ) {
     throw ApiError.badRequest('Invalid coordinates. Expected [longitude, latitude]');
   }
@@ -85,7 +88,11 @@ export const getAvailableOrders = async (userId: string) => {
 };
 
 export const acceptOrder = async (userId: string, orderId: string) => {
-  const partner = await DeliveryPartner.findOne({ user: userId, isOnline: true, isAvailable: true });
+  const partner = await DeliveryPartner.findOne({
+    user: userId,
+    isOnline: true,
+    isAvailable: true,
+  });
   if (!partner) throw ApiError.badRequest('Not available for delivery');
 
   const order = await Order.findOneAndUpdate(
@@ -164,9 +171,15 @@ export const getEarnings = async (userId: string) => {
   };
 
   const [todayOrders, weekOrders, monthOrders] = await Promise.all([
-    Order.find({ ...deliveredFilter, createdAt: { $gte: todayStart } }).select('pricing.deliveryFee'),
-    Order.find({ ...deliveredFilter, createdAt: { $gte: weekStart } }).select('pricing.deliveryFee'),
-    Order.find({ ...deliveredFilter, createdAt: { $gte: monthStart } }).select('pricing.deliveryFee'),
+    Order.find({ ...deliveredFilter, createdAt: { $gte: todayStart } }).select(
+      'pricing.deliveryFee'
+    ),
+    Order.find({ ...deliveredFilter, createdAt: { $gte: weekStart } }).select(
+      'pricing.deliveryFee'
+    ),
+    Order.find({ ...deliveredFilter, createdAt: { $gte: monthStart } }).select(
+      'pricing.deliveryFee'
+    ),
   ]);
 
   const calcEarnings = (orders: typeof todayOrders) =>

@@ -5,6 +5,7 @@
 The Order Creation & Checkout feature is the most critical path in the food delivery application. This audit uncovered **5 critical**, **6 major**, and **4 minor** issues spanning security, data integrity, concurrency, UX, and performance. All issues have been fixed in code.
 
 The most severe findings were:
+
 1. **Coupon race condition** allowing double-spend under concurrent requests
 2. **No idempotency** on order placement, enabling duplicate orders on retry/double-tap
 3. **Broken authorization** on `getOrderById` and `updateStatus` — any restaurant owner could view/modify any order
@@ -48,6 +49,7 @@ const coupon = await Coupon.findOneAndUpdate(
 **Problem:** No idempotency mechanism existed. If a client retried a failed request (network timeout, double-tap), a second order would be created. This is especially dangerous for COD orders where no payment gateway deduplication exists.
 
 **Fix Applied:**
+
 - Added `idempotencyKey` field to Order model with a unique sparse compound index on `(idempotencyKey, customer)`
 - Controller reads `X-Idempotency-Key` header
 - Service checks for existing order with same key before creating
@@ -62,6 +64,7 @@ const coupon = await Coupon.findOneAndUpdate(
 **Problem:** The authorization check compared `order.restaurant.toString() !== userId`. But `order.restaurant` is the restaurant's ObjectId, not the owner's userId. This comparison **always fails** for restaurant owners, meaning they can never view orders for their own restaurant via this endpoint. Conversely, the check was also insufficient — it didn't verify delivery partners.
 
 **Fix Applied:** Rewrote authorization to:
+
 1. Check if user is the customer
 2. Check if user is the delivery partner assigned to the order
 3. For restaurant owners: query Restaurant model to verify ownership
@@ -76,6 +79,7 @@ const coupon = await Coupon.findOneAndUpdate(
 **Problem:** `updateStatus` only validated the state transition, not WHO was making it. Any authenticated restaurant owner could update the status of ANY order (not just their restaurant's). Any delivery partner could update ANY order.
 
 **Fix Applied:** Added role-based authorization:
+
 - Restaurant owners: verified via `Restaurant.findOne({ _id: order.restaurant, owner: userId })`
 - Delivery partners: verified via `order.deliveryPartner === userId`
 - Super admins: allowed (already gated by route middleware)
@@ -91,6 +95,7 @@ const coupon = await Coupon.findOneAndUpdate(
 Additionally, socket event handlers had no input validation — a malicious client could send arbitrary room names to `join-order` or invalid data to `location-update`.
 
 **Fix Applied:**
+
 - Extracted auth middleware into `applyAuthMiddleware()` and applied to each namespace individually
 - Added input validation on all socket event handlers (type checks, length limits)
 
@@ -202,15 +207,15 @@ Additionally, socket event handlers had no input validation — a malicious clie
 
 ## Security Findings
 
-| Finding | Severity | Status |
-|---------|----------|--------|
-| Socket namespaces unauthenticated | 🔴 Critical | Fixed |
-| Any restaurant owner can update any order status | 🔴 Critical | Fixed |
-| getOrderById broken authorization | 🔴 Critical | Fixed |
-| No rate limiting on order placement | 🟠 Major | Noted (requires infrastructure-level fix) |
-| Socket event handlers accept arbitrary input | 🟠 Major | Fixed |
-| ObjectId validation missing at API boundary | 🟡 Minor | Fixed |
-| No per-user coupon usage limit | 🟡 Minor | Noted (requires schema change for user-coupon tracking) |
+| Finding                                          | Severity    | Status                                                  |
+| ------------------------------------------------ | ----------- | ------------------------------------------------------- |
+| Socket namespaces unauthenticated                | 🔴 Critical | Fixed                                                   |
+| Any restaurant owner can update any order status | 🔴 Critical | Fixed                                                   |
+| getOrderById broken authorization                | 🔴 Critical | Fixed                                                   |
+| No rate limiting on order placement              | 🟠 Major    | Noted (requires infrastructure-level fix)               |
+| Socket event handlers accept arbitrary input     | 🟠 Major    | Fixed                                                   |
+| ObjectId validation missing at API boundary      | 🟡 Minor    | Fixed                                                   |
+| No per-user coupon usage limit                   | 🟡 Minor    | Noted (requires schema change for user-coupon tracking) |
 
 **Rate Limiting Note:** The application has no rate limiting middleware (`app.ts` has no `express-rate-limit`). This should be added at infrastructure level (API gateway/nginx) or via `express-rate-limit` middleware. This is an architectural concern beyond this single feature.
 
@@ -218,14 +223,15 @@ Additionally, socket event handlers had no input validation — a malicious clie
 
 ## Performance Findings
 
-| Finding | Impact | Status |
-|---------|--------|--------|
+| Finding                                                                     | Impact          | Status                           |
+| --------------------------------------------------------------------------- | --------------- | -------------------------------- |
 | `getOrderById` authorization now requires extra Restaurant query for owners | ~1ms additional | Acceptable tradeoff for security |
-| `getRestaurantOrders` now validates ownership before querying | ~1ms additional | Acceptable tradeoff for security |
-| Order model indexes are well-designed | N/A | Already good |
-| Cart screen now fetches restaurant data (additional API call) | ~50ms | Cached by React Query |
+| `getRestaurantOrders` now validates ownership before querying               | ~1ms additional | Acceptable tradeoff for security |
+| Order model indexes are well-designed                                       | N/A             | Already good                     |
+| Cart screen now fetches restaurant data (additional API call)               | ~50ms           | Cached by React Query            |
 
 **Existing Good Practices:**
+
 - Compound indexes on `(customer, createdAt)`, `(restaurant, status)`, `(deliveryPartner, status)`
 - Pagination with configurable limits capped at 50
 - `Promise.all` for parallel count + find queries
@@ -234,32 +240,35 @@ Additionally, socket event handlers had no input validation — a malicious clie
 
 ## UX/UI Findings
 
-| Finding | Severity | Status |
-|---------|----------|--------|
-| No double-click protection on Place Order | 🔴 Critical | Fixed (ref guard + disabled state) |
-| No loading state on order detail screen | 🟠 Major | Fixed |
-| No cancel confirmation dialog | 🟠 Major | Fixed |
-| Delivery fee mismatch between cart and actual charge | 🟠 Major | Fixed |
-| Coupon discount not cleared when code is changed | 🟡 Minor | Fixed |
-| Cart item key not unique for variant combos | 🟠 Major | Fixed |
-| Order detail doesn't show variant/addon info | 🟡 Minor | Fixed |
-| Order detail doesn't show full pricing breakdown | 🟡 Minor | Fixed |
-| No address selection UI (only shows default) | 🟡 Minor | Noted (UI enhancement) |
+| Finding                                              | Severity    | Status                             |
+| ---------------------------------------------------- | ----------- | ---------------------------------- |
+| No double-click protection on Place Order            | 🔴 Critical | Fixed (ref guard + disabled state) |
+| No loading state on order detail screen              | 🟠 Major    | Fixed                              |
+| No cancel confirmation dialog                        | 🟠 Major    | Fixed                              |
+| Delivery fee mismatch between cart and actual charge | 🟠 Major    | Fixed                              |
+| Coupon discount not cleared when code is changed     | 🟡 Minor    | Fixed                              |
+| Cart item key not unique for variant combos          | 🟠 Major    | Fixed                              |
+| Order detail doesn't show variant/addon info         | 🟡 Minor    | Fixed                              |
+| Order detail doesn't show full pricing breakdown     | 🟡 Minor    | Fixed                              |
+| No address selection UI (only shows default)         | 🟡 Minor    | Noted (UI enhancement)             |
 
 ---
 
 ## Scalability Risks
 
 ### What breaks at 10k concurrent users:
+
 - **Order number generation**: Fixed with crypto.randomBytes; collision probability negligible at this scale
 - **Coupon race condition**: Fixed with atomic findOneAndUpdate
 
 ### What breaks at 100k concurrent users:
+
 - **No rate limiting**: A single user could flood the order endpoint. Add `express-rate-limit` with a per-user limit (e.g., 5 orders/minute)
 - **Socket.IO single-process**: Will need Redis adapter for horizontal scaling
 - **No database connection pooling config**: Mongoose defaults may be insufficient
 
 ### What breaks at 1M concurrent users:
+
 - **MongoDB write contention on popular coupons**: The atomic `findOneAndUpdate` serializes writes per coupon document. Consider sharding or pre-allocated coupon tokens
 - **Order number uniqueness at extreme throughput**: Current scheme is timestamp + 3 random bytes. At >1000 orders/ms, add process ID or counter
 - **No read replicas**: Order list queries hit primary. Add read preference `secondaryPreferred` for historical order reads
@@ -270,6 +279,7 @@ Additionally, socket event handlers had no input validation — a malicious clie
 ## Code Fixes Applied
 
 ### Files Modified:
+
 1. `apps/api/src/services/order.service.ts` — Atomic coupon, idempotency, authorization, coupon rollback on cancel
 2. `apps/api/src/controllers/order.controller.ts` — Pass user role, read idempotency header
 3. `apps/api/src/models/order.model.ts` — Added `idempotencyKey` field + index
@@ -286,13 +296,13 @@ Additionally, socket event handlers had no input validation — a malicious clie
 
 ## Integration Risks
 
-| Integration | Risk | Mitigation |
-|------------|------|------------|
-| Cart → Order | Cart subtotal could differ from backend-calculated total | Backend is source of truth; cart total is display-only |
-| Coupon → Order | Coupon claimed but order fails | Rollback implemented in catch block |
-| Order → Delivery | No delivery assignment on order creation | By design — restaurant confirms first, delivery assigned when READY |
-| Socket → Order | Status updates not pushed to client | Socket infrastructure exists; recommend emitting from `updateStatus` service |
-| Cancel → Coupon | Coupon not released on cancel | Fixed — usedCount decremented |
+| Integration      | Risk                                                     | Mitigation                                                                   |
+| ---------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Cart → Order     | Cart subtotal could differ from backend-calculated total | Backend is source of truth; cart total is display-only                       |
+| Coupon → Order   | Coupon claimed but order fails                           | Rollback implemented in catch block                                          |
+| Order → Delivery | No delivery assignment on order creation                 | By design — restaurant confirms first, delivery assigned when READY          |
+| Socket → Order   | Status updates not pushed to client                      | Socket infrastructure exists; recommend emitting from `updateStatus` service |
+| Cancel → Coupon  | Coupon not released on cancel                            | Fixed — usedCount decremented                                                |
 
 **Remaining Integration Gap:** The `updateStatus` service doesn't emit socket events. When a restaurant confirms an order, the customer's app relies on 10-second polling (`refetchInterval: 10000`). Recommend adding socket emission in the service layer.
 
@@ -303,6 +313,7 @@ Additionally, socket event handlers had no input validation — a malicious clie
 **⚠️ Risky**
 
 The 5 critical issues have been fixed, but the feature still requires:
+
 1. Rate limiting on the order placement endpoint
 2. Payment gateway integration (currently all orders are COD with fake 'pending' status)
 3. Socket event emission from `updateStatus` for real-time UX

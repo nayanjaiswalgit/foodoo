@@ -7,10 +7,7 @@ export const getProfile = async (userId: string) => {
   return user;
 };
 
-export const updateProfile = async (
-  userId: string,
-  data: { name?: string; avatar?: string }
-) => {
+export const updateProfile = async (userId: string, data: { name?: string; avatar?: string }) => {
   const user = await User.findByIdAndUpdate(userId, data, { new: true });
   if (!user) throw ApiError.notFound('User not found');
   return user;

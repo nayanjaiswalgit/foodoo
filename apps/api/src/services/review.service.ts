@@ -38,11 +38,7 @@ export const createReview = async (userId: string, data: CreateReviewInput) => {
   return review;
 };
 
-export const getRestaurantReviews = async (
-  restaurantId: string,
-  page: number,
-  limit: number
-) => {
+export const getRestaurantReviews = async (restaurantId: string, page: number, limit: number) => {
   const [reviews, total] = await Promise.all([
     Review.find({ restaurant: restaurantId })
       .populate('user', 'name avatar')
@@ -54,12 +50,10 @@ export const getRestaurantReviews = async (
   return { reviews, total };
 };
 
-export const replyToReview = async (
-  ownerId: string,
-  reviewId: string,
-  text: string
-) => {
-  const review = await Review.findById(reviewId).populate<{ restaurant: { _id: string; owner: { toString(): string } } }>('restaurant', 'owner');
+export const replyToReview = async (ownerId: string, reviewId: string, text: string) => {
+  const review = await Review.findById(reviewId).populate<{
+    restaurant: { _id: string; owner: { toString(): string } };
+  }>('restaurant', 'owner');
   if (!review) throw ApiError.notFound('Review not found');
 
   const restaurant = review.restaurant as { _id: string; owner: { toString(): string } };

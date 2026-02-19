@@ -13,6 +13,6 @@ export const updateProfile = asyncHandler(async (req: Request, res: Response) =>
 });
 
 export const toggleFavorite = asyncHandler(async (req: Request, res: Response) => {
-  const user = await userService.toggleFavorite(req.user!._id, (req.params.restaurantId as string));
+  const user = await userService.toggleFavorite(req.user!._id, req.params.restaurantId as string);
   sendResponse(res, 200, user);
 });

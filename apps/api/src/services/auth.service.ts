@@ -85,14 +85,22 @@ export const verifyOtp = async (phone: string, otp: string) => {
   if (!user.otp || !user.otpExpiry) throw ApiError.badRequest('No OTP requested');
   if (user.otpExpiry < new Date()) {
     // Clear expired OTP
-    await User.findByIdAndUpdate(user._id, { otp: undefined, otpExpiry: undefined, otpAttempts: 0 });
+    await User.findByIdAndUpdate(user._id, {
+      otp: undefined,
+      otpExpiry: undefined,
+      otpAttempts: 0,
+    });
     throw ApiError.badRequest('OTP expired');
   }
 
   // Rate limit OTP verification attempts
   const attempts = (user as any).otpAttempts ?? 0;
   if (attempts >= 5) {
-    await User.findByIdAndUpdate(user._id, { otp: undefined, otpExpiry: undefined, otpAttempts: 0 });
+    await User.findByIdAndUpdate(user._id, {
+      otp: undefined,
+      otpExpiry: undefined,
+      otpAttempts: 0,
+    });
     throw ApiError.badRequest('Too many failed attempts. Request a new OTP.');
   }
 

@@ -1,0 +1,34 @@
+---
+description: Rules for the Express API (apps/api)
+globs: ["apps/api/src/**/*.ts"]
+alwaysApply: false
+---
+
+# Backend (apps/api) rules
+
+## Request flow
+Route → `validate.middleware` (Zod) → `auth.middleware` → Controller → Service → Model
+
+## Controllers
+- Import `asyncHandler` from `../utils/asyncHandler` — wrap every async handler.
+- Only call the relevant service method and call `sendResponse` / `sendPaginatedResponse`.
+- Never write business logic in a controller.
+
+## Services
+- Contain all business logic.
+- Throw `new ApiError(statusCode, message)` on failure — never return null for errors.
+- Prefer atomic MongoDB operations (`findOneAndUpdate`, transactions) for concurrent writes.
+
+## Auth
+- `req.user` is `{ _id: string; role: UserRole }` after `authenticate` middleware.
+- Use `authorize('admin', 'restaurant_owner')` to gate routes by role.
+- Access token: 15 min. Refresh token: 7 days (httpOnly cookie).
+
+## Socket.IO
+- Namespaces: `/orders`, `/restaurant`, `/delivery`
+- Rooms: `user:<id>`, `order:<id>`, `restaurant:<id>`, `partner:<id>`
+- Always verify JWT in socket middleware before joining rooms.
+
+## Module format
+- This package is CommonJS. Do not use top-level `import` in runtime files.
+- Config files (turbo.json, tsconfig.json) use JSON — never JS.

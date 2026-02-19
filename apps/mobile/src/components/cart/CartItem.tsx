@@ -16,7 +16,9 @@ export const CartItemRow = ({ menuItemId, name, price, quantity }: CartItemProps
   return (
     <View style={styles.row}>
       <View style={styles.info}>
-        <Text style={styles.name} numberOfLines={1}>{name}</Text>
+        <Text style={styles.name} numberOfLines={1}>
+          {name}
+        </Text>
         <Text style={styles.price}>₹{price * quantity}</Text>
       </View>
       <View style={styles.counter}>
@@ -58,5 +60,11 @@ const styles = StyleSheet.create({
   },
   counterBtn: { paddingHorizontal: SPACING.md, paddingVertical: SPACING.xs },
   counterText: { fontSize: FONT_SIZE.lg, fontWeight: '700', color: COLORS.primary },
-  qty: { fontSize: FONT_SIZE.md, fontWeight: '600', color: COLORS.primary, minWidth: 24, textAlign: 'center' },
+  qty: {
+    fontSize: FONT_SIZE.md,
+    fontWeight: '600',
+    color: COLORS.primary,
+    minWidth: 24,
+    textAlign: 'center',
+  },
 });

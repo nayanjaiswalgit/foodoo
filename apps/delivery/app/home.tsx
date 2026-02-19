@@ -1,5 +1,13 @@
 import React from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, RefreshControl } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  RefreshControl,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { type IOrder } from '@food-delivery/shared';
@@ -14,7 +22,12 @@ export default function HomeScreen() {
 
   useLocationTracking();
 
-  const { data: orders, isLoading, refetch, isRefetching } = useQuery({
+  const {
+    data: orders,
+    isLoading,
+    refetch,
+    isRefetching,
+  } = useQuery({
     queryKey: ['availableOrders'],
     queryFn: deliveryApi.getAvailableOrders,
     enabled: isOnline,
@@ -54,13 +67,15 @@ export default function HomeScreen() {
     <View style={styles.orderCard}>
       <View style={styles.orderHeader}>
         <Text style={styles.orderNum}>#{(item as unknown as IOrder).orderNumber}</Text>
-        <Text style={styles.orderTotal}>₹{((item as unknown as IOrder).pricing?.total ?? 0)}</Text>
+        <Text style={styles.orderTotal}>₹{(item as unknown as IOrder).pricing?.total ?? 0}</Text>
       </View>
       <Text style={styles.orderAddress} numberOfLines={2}>
-        📍 {((item as unknown as IOrder).deliveryAddress?.addressLine1 ?? 'N/A')}
+        📍 {(item as unknown as IOrder).deliveryAddress?.addressLine1 ?? 'N/A'}
       </Text>
       <Text style={styles.orderItems}>
-        {((item as unknown as IOrder).items ?? []).map((i) => `${i.quantity}x ${i.name}`).join(', ')}
+        {((item as unknown as IOrder).items ?? [])
+          .map((i) => `${i.quantity}x ${i.name}`)
+          .join(', ')}
       </Text>
       <TouchableOpacity
         style={styles.acceptBtn}
@@ -157,7 +172,13 @@ const styles = StyleSheet.create({
     borderColor: '#E9ECEF',
   },
   toggleOnline: { borderColor: '#00B894', backgroundColor: '#E8F5E9' },
-  toggleDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: '#B2BEC3', marginRight: 12 },
+  toggleDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#B2BEC3',
+    marginRight: 12,
+  },
   dotOnline: { backgroundColor: '#00B894' },
   toggleText: { fontSize: 15, fontWeight: '600', color: '#636E72' },
   toggleTextOnline: { color: '#00B894' },

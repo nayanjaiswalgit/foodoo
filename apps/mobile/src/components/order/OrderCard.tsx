@@ -43,9 +43,7 @@ export const OrderCard = ({ order }: OrderCardProps) => {
       </Text>
       <View style={styles.footer}>
         <Text style={styles.total}>₹{order.pricing.total}</Text>
-        <Text style={styles.date}>
-          {new Date(order.createdAt).toLocaleDateString()}
-        </Text>
+        <Text style={styles.date}>{new Date(order.createdAt).toLocaleDateString()}</Text>
       </View>
     </TouchableOpacity>
   );

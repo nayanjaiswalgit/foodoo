@@ -1,5 +1,11 @@
 import { Router } from 'express';
-import { registerSchema, loginSchema, sendOtpSchema, verifyOtpSchema, refreshTokenSchema } from '@food-delivery/shared';
+import {
+  registerSchema,
+  loginSchema,
+  sendOtpSchema,
+  verifyOtpSchema,
+  refreshTokenSchema,
+} from '@food-delivery/shared';
 import { validate } from '../middleware/validate.middleware';
 import { authenticate } from '../middleware/auth.middleware';
 import { authLimiter, otpLimiter } from '../middleware/rate-limit.middleware';

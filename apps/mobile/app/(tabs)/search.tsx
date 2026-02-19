@@ -39,7 +39,10 @@ export default function SearchScreen() {
           ))}
         </View>
       ) : isError ? (
-        <EmptyState title="Something went wrong" message="Failed to load restaurants. Please try again." />
+        <EmptyState
+          title="Something went wrong"
+          message="Failed to load restaurants. Please try again."
+        />
       ) : debouncedQuery.length < 2 ? (
         <EmptyState title="Search for food" message="Type at least 2 characters to search" />
       ) : restaurants.length === 0 ? (

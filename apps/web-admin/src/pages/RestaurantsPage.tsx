@@ -47,8 +47,12 @@ export function RestaurantsPage() {
               {restaurants.map((r: Record<string, unknown>) => (
                 <tr key={r._id as string} className="border-t border-gray-50 hover:bg-gray-50">
                   <td className="px-6 py-4 font-medium">{r.name as string}</td>
-                  <td className="px-6 py-4 text-gray-500">{(r.owner as Record<string, string>)?.name ?? 'N/A'}</td>
-                  <td className="px-6 py-4">⭐ {(r.rating as Record<string, number>)?.average ?? 0}</td>
+                  <td className="px-6 py-4 text-gray-500">
+                    {(r.owner as Record<string, string>)?.name ?? 'N/A'}
+                  </td>
+                  <td className="px-6 py-4">
+                    ⭐ {(r.rating as Record<string, number>)?.average ?? 0}
+                  </td>
                   <td className="px-6 py-4">
                     <input
                       type="number"
@@ -65,7 +69,9 @@ export function RestaurantsPage() {
                     />
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${r.isActive ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+                    <span
+                      className={`px-2 py-1 text-xs font-medium rounded-full ${r.isActive ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}
+                    >
                       {r.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </td>
@@ -86,9 +92,23 @@ export function RestaurantsPage() {
 
       {data?.pagination && (
         <div className="flex justify-center gap-2 mt-6">
-          <button disabled={!data.pagination.hasPrev} onClick={() => setPage((p) => p - 1)} className="px-4 py-2 text-sm border border-gray-200 rounded-lg disabled:opacity-50">Previous</button>
-          <span className="px-4 py-2 text-sm text-gray-500">Page {data.pagination.page} of {data.pagination.totalPages}</span>
-          <button disabled={!data.pagination.hasNext} onClick={() => setPage((p) => p + 1)} className="px-4 py-2 text-sm border border-gray-200 rounded-lg disabled:opacity-50">Next</button>
+          <button
+            disabled={!data.pagination.hasPrev}
+            onClick={() => setPage((p) => p - 1)}
+            className="px-4 py-2 text-sm border border-gray-200 rounded-lg disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span className="px-4 py-2 text-sm text-gray-500">
+            Page {data.pagination.page} of {data.pagination.totalPages}
+          </span>
+          <button
+            disabled={!data.pagination.hasNext}
+            onClick={() => setPage((p) => p + 1)}
+            className="px-4 py-2 text-sm border border-gray-200 rounded-lg disabled:opacity-50"
+          >
+            Next
+          </button>
         </div>
       )}
     </div>

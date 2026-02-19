@@ -1,0 +1,23 @@
+---
+description: Core project rules for the food-delivery monorepo
+alwaysApply: true
+---
+
+# food-delivery monorepo — core rules
+
+## Stack
+- **Backend**: Express 4 + TypeScript (CommonJS), Mongoose, Socket.IO, Zod
+- **Mobile**: React Native 0.81, Expo 54, expo-router 5, Zustand, React Query
+- **Web admin**: React 19, Vite 7, Tailwind v4, Zustand, React Query
+- **Shared**: TypeScript-only package consumed as raw source (`workspace:*`)
+
+## Non-negotiable rules
+1. Never use `any`. Use `unknown` + type narrowing, or a proper interface.
+2. Always import roles, order statuses, and payment types from `@food-delivery/shared`.
+3. All backend responses use `sendResponse` or `sendPaginatedResponse` helpers.
+4. Services throw `ApiError` — controllers never throw directly.
+5. `asyncHandler` wraps every async Express handler — no bare try/catch.
+
+## Shared package is canonical
+When a type, enum, or schema needs to exist in more than one package, put it in
+`packages/shared/src/` first, then import it everywhere else.

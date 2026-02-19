@@ -44,7 +44,10 @@ export const listRestaurants = async (query: ListQuery) => {
   else if (sortBy === 'priceDesc') sort = { priceRange: -1 };
 
   const [restaurants, total] = await Promise.all([
-    Restaurant.find(filter).sort(sort).skip((page - 1) * limit).limit(limit),
+    Restaurant.find(filter)
+      .sort(sort)
+      .skip((page - 1) * limit)
+      .limit(limit),
     Restaurant.countDocuments(filter),
   ]);
 

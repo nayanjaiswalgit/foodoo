@@ -38,14 +38,19 @@ export const RestaurantCard = ({ restaurant, isFavorite }: RestaurantCardProps) 
       )}
       <TouchableOpacity
         style={styles.heartBtn}
-        onPress={(e) => { e.stopPropagation(); favMutation.mutate(); }}
+        onPress={(e) => {
+          e.stopPropagation();
+          favMutation.mutate();
+        }}
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
         <Text style={styles.heartIcon}>{isFavorite ? '❤️' : '🤍'}</Text>
       </TouchableOpacity>
       <View style={styles.info}>
         <View style={styles.row}>
-          <Text style={styles.name} numberOfLines={1}>{restaurant.name}</Text>
+          <Text style={styles.name} numberOfLines={1}>
+            {restaurant.name}
+          </Text>
           <Rating average={restaurant.rating.average} count={restaurant.rating.count} size="sm" />
         </View>
         <Text style={styles.cuisines} numberOfLines={1}>
@@ -100,7 +105,13 @@ const styles = StyleSheet.create({
   heartIcon: { fontSize: 16 },
   info: { padding: SPACING.md },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  name: { fontSize: FONT_SIZE.lg, fontWeight: '700', color: COLORS.text, flex: 1, marginRight: SPACING.sm },
+  name: {
+    fontSize: FONT_SIZE.lg,
+    fontWeight: '700',
+    color: COLORS.text,
+    flex: 1,
+    marginRight: SPACING.sm,
+  },
   cuisines: { fontSize: FONT_SIZE.sm, color: COLORS.textSecondary, marginTop: 2 },
   meta: { fontSize: FONT_SIZE.sm, color: COLORS.textSecondary },
   dot: { color: COLORS.textLight, marginHorizontal: SPACING.xs },

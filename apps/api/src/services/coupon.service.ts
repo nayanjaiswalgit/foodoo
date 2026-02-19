@@ -46,7 +46,17 @@ export const createCoupon = async (data: CreateCouponInput) => {
   return Coupon.create(data);
 };
 
-const COUPON_UPDATABLE_FIELDS = ['discountType', 'discountValue', 'minOrderAmount', 'maxDiscount', 'validFrom', 'validUntil', 'usageLimit', 'isActive', 'restaurant'] as const;
+const COUPON_UPDATABLE_FIELDS = [
+  'discountType',
+  'discountValue',
+  'minOrderAmount',
+  'maxDiscount',
+  'validFrom',
+  'validUntil',
+  'usageLimit',
+  'isActive',
+  'restaurant',
+] as const;
 
 export const updateCoupon = async (couponId: string, data: Partial<CreateCouponInput>) => {
   const sanitized: Record<string, unknown> = {};

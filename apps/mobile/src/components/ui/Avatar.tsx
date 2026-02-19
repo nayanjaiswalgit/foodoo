@@ -28,18 +28,17 @@ export const Avatar = ({ uri, name, size = 40 }: AvatarProps) => {
   }
 
   return (
-    <View
-      style={[
-        styles.fallback,
-        { width: size, height: size, borderRadius: size / 2 },
-      ]}
-    >
+    <View style={[styles.fallback, { width: size, height: size, borderRadius: size / 2 }]}>
       <Text style={[styles.initials, { fontSize: size * 0.4 }]}>{initials}</Text>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  fallback: { backgroundColor: COLORS.primaryLight, alignItems: 'center', justifyContent: 'center' },
+  fallback: {
+    backgroundColor: COLORS.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   initials: { color: '#FFF', fontWeight: '700' },
 });

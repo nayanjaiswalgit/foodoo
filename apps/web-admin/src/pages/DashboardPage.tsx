@@ -31,7 +31,11 @@ export function DashboardPage() {
             <StatCard title="Total Users" value={adminDash.totalUsers} icon="👥" />
             <StatCard title="Total Restaurants" value={adminDash.totalRestaurants} icon="🏪" />
             <StatCard title="Total Orders" value={adminDash.totalOrders} icon="📋" />
-            <StatCard title="Total Revenue" value={`₹${adminDash.totalRevenue.toLocaleString()}`} icon="💰" />
+            <StatCard
+              title="Total Revenue"
+              value={`₹${adminDash.totalRevenue.toLocaleString()}`}
+              icon="💰"
+            />
           </div>
 
           <div className="bg-white rounded-xl border border-gray-100 p-6">
@@ -50,13 +54,17 @@ export function DashboardPage() {
                   {adminDash.recentOrders.map((order: Record<string, unknown>) => (
                     <tr key={order._id as string} className="border-b border-gray-50">
                       <td className="py-3 font-medium">{order.orderNumber as string}</td>
-                      <td className="py-3">{(order.restaurant as Record<string, string>)?.name ?? 'N/A'}</td>
+                      <td className="py-3">
+                        {(order.restaurant as Record<string, string>)?.name ?? 'N/A'}
+                      </td>
                       <td className="py-3">
                         <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-50 text-blue-600">
                           {(order.status as string).replace(/_/g, ' ')}
                         </span>
                       </td>
-                      <td className="py-3 font-medium">₹{((order.pricing as Record<string, number>)?.total ?? 0)}</td>
+                      <td className="py-3 font-medium">
+                        ₹{(order.pricing as Record<string, number>)?.total ?? 0}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

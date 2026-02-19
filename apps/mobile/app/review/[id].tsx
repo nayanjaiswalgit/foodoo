@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput, StyleSheet, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+  StyleSheet,
+  Alert,
+} from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { reviewApi } from '../../src/services/review.service';
@@ -9,7 +17,11 @@ import { COLORS, SPACING, FONT_SIZE, RADIUS } from '../../src/constants/theme';
 const STARS = [1, 2, 3, 4, 5];
 
 export default function WriteReviewScreen() {
-  const { id: orderId, restaurantId, restaurantName } = useLocalSearchParams<{
+  const {
+    id: orderId,
+    restaurantId,
+    restaurantName,
+  } = useLocalSearchParams<{
     id: string;
     restaurantId: string;
     restaurantName: string;
@@ -34,7 +46,8 @@ export default function WriteReviewScreen() {
         { text: 'OK', onPress: () => router.back() },
       ]);
     },
-    onError: () => Alert.alert('Error', 'Could not submit review. You may have already reviewed this order.'),
+    onError: () =>
+      Alert.alert('Error', 'Could not submit review. You may have already reviewed this order.'),
   });
 
   const canSubmit = rating > 0 && comment.trim().length >= 5;
@@ -96,7 +109,12 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   content: { padding: SPACING.lg, paddingBottom: 40 },
   title: { fontSize: FONT_SIZE.xxl, fontWeight: '700', color: COLORS.text, textAlign: 'center' },
-  subtitle: { fontSize: FONT_SIZE.md, color: COLORS.textSecondary, textAlign: 'center', marginTop: SPACING.xs },
+  subtitle: {
+    fontSize: FONT_SIZE.md,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    marginTop: SPACING.xs,
+  },
   starsRow: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -114,7 +132,12 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
   },
   commentCard: { marginTop: SPACING.lg, marginBottom: SPACING.lg },
-  commentLabel: { fontSize: FONT_SIZE.md, fontWeight: '600', color: COLORS.text, marginBottom: SPACING.sm },
+  commentLabel: {
+    fontSize: FONT_SIZE.md,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: SPACING.sm,
+  },
   textInput: {
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -124,5 +147,10 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     minHeight: 120,
   },
-  charCount: { textAlign: 'right', fontSize: FONT_SIZE.xs, color: COLORS.textLight, marginTop: SPACING.xs },
+  charCount: {
+    textAlign: 'right',
+    fontSize: FONT_SIZE.xs,
+    color: COLORS.textLight,
+    marginTop: SPACING.xs,
+  },
 });

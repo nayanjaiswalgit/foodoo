@@ -8,7 +8,13 @@ import * as orderController from '../controllers/order.controller';
 const router: Router = Router();
 
 router.use(authenticate);
-router.post('/', orderLimiter, authorize(UserRole.CUSTOMER), validate(placeOrderSchema), orderController.placeOrder);
+router.post(
+  '/',
+  orderLimiter,
+  authorize(UserRole.CUSTOMER),
+  validate(placeOrderSchema),
+  orderController.placeOrder
+);
 router.get('/my', authorize(UserRole.CUSTOMER), orderController.getMyOrders);
 router.get('/:id', orderController.getOrderById);
 router.post('/:id/cancel', authorize(UserRole.CUSTOMER), orderController.cancelOrder);

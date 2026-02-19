@@ -1,0 +1,23 @@
+# Build outputs
+dist/
+build/
+.expo/
+.expo-shared/
+
+# Dependencies
+node_modules/
+
+# Generated / auto-managed
+pnpm-lock.yaml
+*.lock
+
+# Turbo cache
+.turbo/
+
+# Mobile
+android/
+ios/
+
+# Misc
+coverage/
+*.min.js

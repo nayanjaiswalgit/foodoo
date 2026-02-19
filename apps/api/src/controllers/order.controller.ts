@@ -16,7 +16,11 @@ export const getMyOrders = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const getOrderById = asyncHandler(async (req: Request, res: Response) => {
-  const order = await orderService.getOrderById(req.params.id as string, req.user!._id, req.user!.role);
+  const order = await orderService.getOrderById(
+    req.params.id as string,
+    req.user!._id,
+    req.user!.role
+  );
   sendResponse(res, 200, order);
 });
 

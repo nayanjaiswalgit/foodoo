@@ -8,17 +8,17 @@ export const authApi = {
   login: (data: LoginInput) =>
     apiClient.post<{ data: ILoginResponse }>('/auth/login', data).then((r) => r.data.data),
 
-  sendOtp: (phone: string) =>
-    apiClient.post('/auth/send-otp', { phone }).then((r) => r.data),
+  sendOtp: (phone: string) => apiClient.post('/auth/send-otp', { phone }).then((r) => r.data),
 
   verifyOtp: (phone: string, otp: string) =>
-    apiClient.post<{ data: ILoginResponse }>('/auth/verify-otp', { phone, otp }).then((r) => r.data.data),
+    apiClient
+      .post<{ data: ILoginResponse }>('/auth/verify-otp', { phone, otp })
+      .then((r) => r.data.data),
 
   refreshToken: (refreshToken: string) =>
     apiClient.post('/auth/refresh-token', { refreshToken }).then((r) => r.data.data),
 
   logout: () => apiClient.post('/auth/logout'),
 
-  getProfile: () =>
-    apiClient.get('/users/profile').then((r) => r.data.data),
+  getProfile: () => apiClient.get('/users/profile').then((r) => r.data.data),
 };
