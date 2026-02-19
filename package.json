@@ -1,0 +1,18 @@
+{
+  "name": "food-delivery",
+  "private": true,
+  "scripts": {
+    "dev:api": "turbo run dev --filter=@food-delivery/api",
+    "dev:mobile": "turbo run dev --filter=@food-delivery/mobile",
+    "dev:delivery": "turbo run dev --filter=@food-delivery/delivery",
+    "dev:admin": "turbo run dev --filter=@food-delivery/web-admin",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "clean": "turbo run clean"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.0",
+    "typescript": "^5.6.0"
+  },
+  "packageManager": "pnpm@9.15.0"
+}
