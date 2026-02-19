@@ -49,7 +49,7 @@ export default function AccountScreen() {
         <Divider marginVertical={0} />
         <MenuItem icon="👤" label="Edit Profile" onPress={() => router.push('/profile')} />
         <Divider marginVertical={0} />
-        <MenuItem icon="❤️" label="Favorites" onPress={() => router.push('/(tabs)/search')} />
+        <MenuItem icon="❤️" label="Favorites" onPress={() => router.push('/favorites')} />
       </Card>
 
       <Button

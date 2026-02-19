@@ -3,10 +3,11 @@ import { View, Text, SectionList, StyleSheet, TouchableOpacity, Alert } from 're
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
-import { type IMenuItem } from '@food-delivery/shared';
+import { type IMenuItem, type IReview } from '@food-delivery/shared';
 import { restaurantApi } from '../../src/services/restaurant.service';
+import { reviewApi } from '../../src/services/review.service';
 import { MenuItemCard } from '../../src/components/restaurant/MenuItemCard';
-import { Rating, Badge } from '../../src/components/ui';
+import { Rating, Badge, Card } from '../../src/components/ui';
 import { useCartStore } from '../../src/stores/cart.store';
 import { COLORS, SPACING, FONT_SIZE, RADIUS } from '../../src/constants/theme';
 
@@ -24,6 +25,12 @@ export default function RestaurantDetailScreen() {
   const { data: menuItems } = useQuery({
     queryKey: ['menu', id],
     queryFn: () => restaurantApi.getMenu(id),
+    enabled: !!id,
+  });
+
+  const { data: reviewsData } = useQuery({
+    queryKey: ['reviews', id],
+    queryFn: () => reviewApi.getByRestaurant(id, 1, 5),
     enabled: !!id,
   });
 
@@ -107,6 +114,29 @@ export default function RestaurantDetailScreen() {
             </View>
           </View>
         }
+        ListFooterComponent={
+          reviewsData?.data && reviewsData.data.length > 0 ? (
+            <View style={styles.reviewsSection}>
+              <Text style={styles.reviewsSectionTitle}>Reviews</Text>
+              {reviewsData.data.map((review: IReview) => (
+                <Card key={review._id} style={styles.reviewCard}>
+                  <View style={styles.reviewHeader}>
+                    <Text style={styles.reviewUser}>
+                      {typeof review.user === 'object' ? review.user.name : 'Customer'}
+                    </Text>
+                    <Text style={styles.reviewStars}>
+                      {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
+                    </Text>
+                  </View>
+                  <Text style={styles.reviewComment}>{review.comment}</Text>
+                  <Text style={styles.reviewDate}>
+                    {new Date(review.createdAt).toLocaleDateString()}
+                  </Text>
+                </Card>
+              ))}
+            </View>
+          ) : null
+        }
         contentContainerStyle={styles.listContent}
         stickySectionHeadersEnabled={false}
       />
@@ -151,4 +181,12 @@ const styles = StyleSheet.create({
   },
   cartText: { color: '#FFF', fontSize: FONT_SIZE.md, fontWeight: '600' },
   cartAction: { color: '#FFF', fontSize: FONT_SIZE.md, fontWeight: '700' },
+  reviewsSection: { paddingTop: SPACING.xl },
+  reviewsSectionTitle: { fontSize: FONT_SIZE.xl, fontWeight: '700', color: COLORS.text, marginBottom: SPACING.md },
+  reviewCard: { marginBottom: SPACING.sm },
+  reviewHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.xs },
+  reviewUser: { fontSize: FONT_SIZE.md, fontWeight: '600', color: COLORS.text },
+  reviewStars: { fontSize: FONT_SIZE.md, color: COLORS.star },
+  reviewComment: { fontSize: FONT_SIZE.sm, color: COLORS.textSecondary, lineHeight: 18 },
+  reviewDate: { fontSize: FONT_SIZE.xs, color: COLORS.textLight, marginTop: SPACING.xs },
 });

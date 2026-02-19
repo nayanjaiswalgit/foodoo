@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { orderApi } from '../../src/services/order.service';
 import { Card, Badge, Divider, Button } from '../../src/components/ui';
@@ -20,6 +20,7 @@ const STATUS_LABELS: Record<string, string> = {
 
 export default function OrderDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const { emit } = useSocket('orders');
 
   const { data: order, refetch } = useQuery({
@@ -39,6 +40,9 @@ export default function OrderDetailScreen() {
   if (!order) return null;
 
   const canCancel = order.status === 'placed' || order.status === 'confirmed';
+  const isDelivered = order.status === 'delivered';
+  const restaurantId = typeof order.restaurant === 'string' ? order.restaurant : order.restaurant?._id;
+  const restaurantName = typeof order.restaurant === 'object' ? order.restaurant?.name : undefined;
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -107,6 +111,20 @@ export default function OrderDetailScreen() {
           style={styles.cancelBtn}
         />
       )}
+
+      {isDelivered && restaurantId && (
+        <Button
+          title="⭐ Write a Review"
+          onPress={() =>
+            router.push({
+              pathname: '/review/[id]',
+              params: { id: order._id, restaurantId, restaurantName: restaurantName ?? 'Restaurant' },
+            })
+          }
+          fullWidth
+          style={styles.reviewBtn}
+        />
+      )}
     </ScrollView>
   );
 }
@@ -132,4 +150,5 @@ const styles = StyleSheet.create({
   totalValue: { fontSize: FONT_SIZE.lg, fontWeight: '700', color: COLORS.text },
   addressText: { fontSize: FONT_SIZE.sm, color: COLORS.textSecondary, lineHeight: 20 },
   cancelBtn: { marginTop: SPACING.xl },
+  reviewBtn: { marginTop: SPACING.lg },
 });

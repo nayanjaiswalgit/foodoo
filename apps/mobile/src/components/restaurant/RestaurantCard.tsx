@@ -2,16 +2,27 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { type IRestaurant } from '@food-delivery/shared';
+import { restaurantApi } from '../../services/restaurant.service';
 import { Rating } from '../ui/Rating';
 import { COLORS, SPACING, FONT_SIZE, RADIUS } from '../../constants/theme';
 
 interface RestaurantCardProps {
   restaurant: IRestaurant;
+  isFavorite?: boolean;
 }
 
-export const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
+export const RestaurantCard = ({ restaurant, isFavorite }: RestaurantCardProps) => {
   const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const favMutation = useMutation({
+    mutationFn: () => restaurantApi.toggleFavorite(restaurant._id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+    },
+  });
 
   const handlePress = () => {
     router.push(`/restaurant/${restaurant._id}`);
@@ -25,6 +36,13 @@ export const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
           <Text style={styles.featuredText}>Featured</Text>
         </View>
       )}
+      <TouchableOpacity
+        style={styles.heartBtn}
+        onPress={(e) => { e.stopPropagation(); favMutation.mutate(); }}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      >
+        <Text style={styles.heartIcon}>{isFavorite ? '❤️' : '🤍'}</Text>
+      </TouchableOpacity>
       <View style={styles.info}>
         <View style={styles.row}>
           <Text style={styles.name} numberOfLines={1}>{restaurant.name}</Text>
@@ -68,6 +86,18 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.sm,
   },
   featuredText: { color: '#FFF', fontSize: FONT_SIZE.xs, fontWeight: '700' },
+  heartBtn: {
+    position: 'absolute',
+    top: SPACING.sm,
+    right: SPACING.sm,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderRadius: RADIUS.full,
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  heartIcon: { fontSize: 16 },
   info: { padding: SPACING.md },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   name: { fontSize: FONT_SIZE.lg, fontWeight: '700', color: COLORS.text, flex: 1, marginRight: SPACING.sm },

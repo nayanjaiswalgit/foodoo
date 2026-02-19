@@ -31,6 +31,8 @@ export default function RootLayout() {
         <Stack.Screen name="order/[id]" options={{ title: 'Order Details' }} />
         <Stack.Screen name="address/index" options={{ title: 'My Addresses' }} />
         <Stack.Screen name="profile/index" options={{ title: 'Profile' }} />
+        <Stack.Screen name="favorites/index" options={{ title: 'Favorites' }} />
+        <Stack.Screen name="review/[id]" options={{ title: 'Write Review' }} />
       </Stack>
     </QueryClientProvider>
   );
