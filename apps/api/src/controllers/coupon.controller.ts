@@ -18,11 +18,11 @@ export const create = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const update = asyncHandler(async (req: Request, res: Response) => {
-  const coupon = await couponService.updateCoupon(req.params.id!, req.body);
+  const coupon = await couponService.updateCoupon((req.params.id as string), req.body);
   sendResponse(res, 200, coupon, 'Coupon updated');
 });
 
 export const remove = asyncHandler(async (req: Request, res: Response) => {
-  await couponService.deleteCoupon(req.params.id!);
+  await couponService.deleteCoupon((req.params.id as string));
   sendResponse(res, 200, null, 'Coupon deleted');
 });

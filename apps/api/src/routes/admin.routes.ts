@@ -3,7 +3,7 @@ import { UserRole } from '@food-delivery/shared';
 import { authenticate, authorize } from '../middleware/auth.middleware';
 import * as adminController from '../controllers/admin.controller';
 
-const router = Router();
+const router: Router = Router();
 
 router.use(authenticate, authorize(UserRole.SUPER_ADMIN));
 router.get('/dashboard', adminController.getDashboard);

@@ -2,7 +2,14 @@ import { NavLink } from 'react-router-dom';
 import { useAuthStore } from '../stores/auth.store';
 import { UserRole } from '@food-delivery/shared';
 
-const NAV_ITEMS = [
+interface NavItem {
+  to: string;
+  label: string;
+  icon: string;
+  roles: UserRole[];
+}
+
+const NAV_ITEMS: NavItem[] = [
   { to: '/', label: 'Dashboard', icon: '📊', roles: [UserRole.RESTAURANT_OWNER, UserRole.SUPER_ADMIN] },
   { to: '/orders', label: 'Orders', icon: '📋', roles: [UserRole.RESTAURANT_OWNER, UserRole.SUPER_ADMIN] },
   { to: '/menu', label: 'Menu', icon: '🍕', roles: [UserRole.RESTAURANT_OWNER] },
@@ -16,7 +23,7 @@ export function Sidebar() {
   const { user, logout } = useAuthStore();
 
   const visibleItems = NAV_ITEMS.filter(
-    (item) => user && item.roles.includes(user.role as typeof UserRole[keyof typeof UserRole])
+    (item) => user && item.roles.includes(user.role)
   );
 
   return (

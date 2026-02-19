@@ -3,7 +3,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { restaurantApi } from '../services/restaurant.service';
 import { useAuthStore } from '../stores/auth.store';
 import { UserRole, OrderStatus } from '@food-delivery/shared';
-import { adminApi } from '../services/admin.service';
 
 const STATUS_OPTIONS = [
   { value: '', label: 'All' },

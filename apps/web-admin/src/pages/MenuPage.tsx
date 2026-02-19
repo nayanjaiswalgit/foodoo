@@ -36,7 +36,12 @@ export function MenuPage() {
 
   const createMutation = useMutation({
     mutationFn: (data: { name: string; price: number; category: string; isVeg: boolean; description: string }) =>
-      restaurantApi.createMenuItem(restaurant._id, data),
+      restaurantApi.createMenuItem(restaurant._id, {
+        ...data,
+        addons: [],
+        variants: [],
+        sortOrder: 0,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['menu'] });
       setShowForm(false);

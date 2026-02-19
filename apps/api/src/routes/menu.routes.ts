@@ -4,7 +4,7 @@ import { validate } from '../middleware/validate.middleware';
 import { authenticate, authorize } from '../middleware/auth.middleware';
 import * as menuController from '../controllers/menu.controller';
 
-const router = Router();
+const router: Router = Router();
 
 router.get('/categories', menuController.getCategories);
 

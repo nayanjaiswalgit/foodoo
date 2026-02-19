@@ -27,12 +27,12 @@ export const getAvailableOrders = asyncHandler(async (req: Request, res: Respons
 });
 
 export const acceptOrder = asyncHandler(async (req: Request, res: Response) => {
-  const order = await deliveryService.acceptOrder(req.user!._id, req.params.orderId!);
+  const order = await deliveryService.acceptOrder(req.user!._id, (req.params.orderId as string));
   sendResponse(res, 200, order, 'Order accepted');
 });
 
 export const completeDelivery = asyncHandler(async (req: Request, res: Response) => {
-  const order = await deliveryService.completeDelivery(req.user!._id, req.params.orderId!);
+  const order = await deliveryService.completeDelivery(req.user!._id, (req.params.orderId as string));
   sendResponse(res, 200, order, 'Delivery completed');
 });
 

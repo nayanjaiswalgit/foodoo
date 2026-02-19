@@ -13,16 +13,16 @@ export const createAddress = asyncHandler(async (req: Request, res: Response) =>
 });
 
 export const updateAddress = asyncHandler(async (req: Request, res: Response) => {
-  const address = await addressService.updateAddress(req.user!._id, req.params.id!, req.body);
+  const address = await addressService.updateAddress(req.user!._id, (req.params.id as string), req.body);
   sendResponse(res, 200, address, 'Address updated');
 });
 
 export const deleteAddress = asyncHandler(async (req: Request, res: Response) => {
-  await addressService.deleteAddress(req.user!._id, req.params.id!);
+  await addressService.deleteAddress(req.user!._id, (req.params.id as string));
   sendResponse(res, 200, null, 'Address deleted');
 });
 
 export const setDefault = asyncHandler(async (req: Request, res: Response) => {
-  const address = await addressService.setDefault(req.user!._id, req.params.id!);
+  const address = await addressService.setDefault(req.user!._id, (req.params.id as string));
   sendResponse(res, 200, address, 'Default address set');
 });

@@ -6,10 +6,10 @@ import { ApiError } from '../utils/api-error';
 
 const generateTokens = (userId: string, role: UserRole) => {
   const accessToken = jwt.sign({ userId, role }, env.JWT_ACCESS_SECRET, {
-    expiresIn: env.JWT_ACCESS_EXPIRY,
+    expiresIn: env.JWT_ACCESS_EXPIRY as any,
   });
   const refreshToken = jwt.sign({ userId, role }, env.JWT_REFRESH_SECRET, {
-    expiresIn: env.JWT_REFRESH_EXPIRY,
+    expiresIn: env.JWT_REFRESH_EXPIRY as any,
   });
   return { accessToken, refreshToken };
 };

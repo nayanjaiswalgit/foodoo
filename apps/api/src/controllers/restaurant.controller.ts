@@ -28,12 +28,12 @@ export const nearby = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const getById = asyncHandler(async (req: Request, res: Response) => {
-  const restaurant = await restaurantService.getById(req.params.id!);
+  const restaurant = await restaurantService.getById((req.params.id as string));
   sendResponse(res, 200, restaurant);
 });
 
 export const getMenu = asyncHandler(async (req: Request, res: Response) => {
-  const menu = await restaurantService.getMenu(req.params.id!);
+  const menu = await restaurantService.getMenu((req.params.id as string));
   sendResponse(res, 200, menu);
 });
 
@@ -43,7 +43,7 @@ export const create = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const update = asyncHandler(async (req: Request, res: Response) => {
-  const restaurant = await restaurantService.update(req.user!._id, req.params.id!, req.body);
+  const restaurant = await restaurantService.update(req.user!._id, (req.params.id as string), req.body);
   sendResponse(res, 200, restaurant, 'Restaurant updated');
 });
 

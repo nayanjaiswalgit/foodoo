@@ -4,7 +4,7 @@ import { validate } from '../middleware/validate.middleware';
 import { authenticate, authorize } from '../middleware/auth.middleware';
 import * as couponController from '../controllers/coupon.controller';
 
-const router = Router();
+const router: Router = Router();
 
 router.use(authenticate);
 router.post('/validate', validate(validateCouponSchema), couponController.validate);

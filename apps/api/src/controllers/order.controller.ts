@@ -15,7 +15,7 @@ export const getMyOrders = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const getOrderById = asyncHandler(async (req: Request, res: Response) => {
-  const order = await orderService.getOrderById(req.params.id!, req.user!._id);
+  const order = await orderService.getOrderById((req.params.id as string), req.user!._id);
   sendResponse(res, 200, order);
 });
 
@@ -23,7 +23,7 @@ export const getRestaurantOrders = asyncHandler(async (req: Request, res: Respon
   const page = Number(req.query.page) || 1;
   const limit = Math.min(Number(req.query.limit) || 10, 50);
   const { orders, total } = await orderService.getRestaurantOrders(
-    req.params.restaurantId!,
+    (req.params.restaurantId as string),
     req.query.status as string | undefined,
     page,
     limit
@@ -32,11 +32,11 @@ export const getRestaurantOrders = asyncHandler(async (req: Request, res: Respon
 });
 
 export const updateStatus = asyncHandler(async (req: Request, res: Response) => {
-  const order = await orderService.updateStatus(req.params.id!, req.body.status, req.body.note);
+  const order = await orderService.updateStatus((req.params.id as string), req.body.status, req.body.note);
   sendResponse(res, 200, order, 'Status updated');
 });
 
 export const cancelOrder = asyncHandler(async (req: Request, res: Response) => {
-  const order = await orderService.cancelOrder(req.params.id!, req.user!._id);
+  const order = await orderService.cancelOrder((req.params.id as string), req.user!._id);
   sendResponse(res, 200, order, 'Order cancelled');
 });

@@ -4,7 +4,7 @@ import { validate } from '../middleware/validate.middleware';
 import { authenticate } from '../middleware/auth.middleware';
 import * as addressController from '../controllers/address.controller';
 
-const router = Router();
+const router: Router = Router();
 
 router.use(authenticate);
 router.get('/', addressController.getAddresses);

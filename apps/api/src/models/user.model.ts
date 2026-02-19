@@ -50,7 +50,7 @@ userSchema.methods.comparePassword = async function (password: string): Promise<
 };
 
 userSchema.set('toJSON', {
-  transform(_doc, ret) {
+  transform(_doc, ret: any) {
     delete ret.passwordHash;
     delete ret.otp;
     delete ret.otpExpiry;

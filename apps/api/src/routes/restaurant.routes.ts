@@ -4,7 +4,7 @@ import { validate } from '../middleware/validate.middleware';
 import { authenticate, authorize } from '../middleware/auth.middleware';
 import * as restaurantController from '../controllers/restaurant.controller';
 
-const router = Router();
+const router: Router = Router();
 
 router.get('/', restaurantController.list);
 router.get('/nearby', restaurantController.nearby);

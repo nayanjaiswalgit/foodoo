@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Express } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { env } from './config/env';
@@ -15,7 +15,7 @@ import { reviewRoutes } from './routes/review.routes';
 import { uploadRoutes } from './routes/upload.routes';
 import { adminRoutes } from './routes/admin.routes';
 
-export const createApp = () => {
+export const createApp = (): Express => {
   const app = express();
 
   app.use(cors({ origin: env.CLIENT_URL, credentials: true }));

@@ -4,7 +4,7 @@ import { validate } from '../middleware/validate.middleware';
 import { authenticate, authorize } from '../middleware/auth.middleware';
 import * as orderController from '../controllers/order.controller';
 
-const router = Router();
+const router: Router = Router();
 
 router.use(authenticate);
 router.post('/', authorize(UserRole.CUSTOMER), validate(placeOrderSchema), orderController.placeOrder);

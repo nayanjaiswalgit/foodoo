@@ -16,7 +16,7 @@ export const listUsers = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const toggleUserActive = asyncHandler(async (req: Request, res: Response) => {
-  const user = await adminService.toggleUserActive(req.params.id!);
+  const user = await adminService.toggleUserActive((req.params.id as string));
   sendResponse(res, 200, user);
 });
 
@@ -28,12 +28,12 @@ export const listRestaurants = asyncHandler(async (req: Request, res: Response) 
 });
 
 export const toggleRestaurantActive = asyncHandler(async (req: Request, res: Response) => {
-  const restaurant = await adminService.toggleRestaurantActive(req.params.id!);
+  const restaurant = await adminService.toggleRestaurantActive((req.params.id as string));
   sendResponse(res, 200, restaurant);
 });
 
 export const updateCommission = asyncHandler(async (req: Request, res: Response) => {
-  const restaurant = await adminService.updateCommission(req.params.id!, req.body.commission);
+  const restaurant = await adminService.updateCommission((req.params.id as string), req.body.commission);
   sendResponse(res, 200, restaurant, 'Commission updated');
 });
 
