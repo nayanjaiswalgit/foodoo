@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Alert } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, ScrollView, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { PaymentMethod } from '@food-delivery/shared';
@@ -9,7 +9,8 @@ import { useCartStore } from '../../src/stores/cart.store';
 import { addressApi } from '../../src/services/address.service';
 import { orderApi } from '../../src/services/order.service';
 import { couponApi } from '../../src/services/coupon.service';
-import { COLORS, SPACING, FONT_SIZE } from '../../src/constants/theme';
+import { restaurantApi } from '../../src/services/restaurant.service';
+import { COLORS, SPACING, FONT_SIZE, RADIUS } from '../../src/constants/theme';
 
 export default function CartScreen() {
   const router = useRouter();
@@ -18,14 +19,22 @@ export default function CartScreen() {
   const [couponCode, setCouponCode] = useState('');
   const [discount, setDiscount] = useState(0);
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
+  const isSubmitting = useRef(false);
 
   const { data: addresses } = useQuery({
     queryKey: ['addresses'],
     queryFn: addressApi.getAll,
   });
 
+  const { data: restaurant } = useQuery({
+    queryKey: ['restaurant', restaurantId],
+    queryFn: () => restaurantApi.getById(restaurantId!),
+    enabled: !!restaurantId,
+  });
+
   const defaultAddress = addresses?.find((a) => a.isDefault) ?? addresses?.[0];
   const addressId = selectedAddress ?? defaultAddress?._id ?? null;
+  const deliveryFee = restaurant?.deliveryFee ?? 30;
 
   const applyCouponMutation = useMutation({
     mutationFn: () => couponApi.validate(couponCode, getSubtotal(), restaurantId ?? undefined),
@@ -34,26 +43,47 @@ export default function CartScreen() {
   });
 
   const placeOrderMutation = useMutation({
-    mutationFn: () =>
-      orderApi.place({
-        restaurant: restaurantId!,
-        items: items.map((i) => ({
-          menuItem: i.menuItemId,
-          quantity: i.quantity,
-          variant: i.variant,
-          addons: i.addons,
-        })),
-        deliveryAddress: addressId!,
-        paymentMethod: PaymentMethod.COD,
-        couponCode: couponCode || undefined,
-      }),
+    mutationFn: () => {
+      const idempotencyKey = `${restaurantId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      return orderApi.place(
+        {
+          restaurant: restaurantId!,
+          items: items.map((i) => ({
+            menuItem: i.menuItemId,
+            quantity: i.quantity,
+            variant: i.variant,
+            addons: i.addons,
+          })),
+          deliveryAddress: addressId!,
+          paymentMethod: PaymentMethod.COD,
+          couponCode: couponCode || undefined,
+        },
+        idempotencyKey
+      );
+    },
     onSuccess: (order) => {
+      isSubmitting.current = false;
       clearCart();
+      setDiscount(0);
+      setCouponCode('');
       queryClient.invalidateQueries({ queryKey: ['myOrders'] });
       router.replace(`/order/${order._id}`);
     },
-    onError: (err: Error) => Alert.alert('Order Failed', err.message),
+    onError: (err: Error) => {
+      isSubmitting.current = false;
+      Alert.alert('Order Failed', err.message);
+    },
   });
+
+  const handlePlaceOrder = () => {
+    if (isSubmitting.current || placeOrderMutation.isPending) return;
+    if (!addressId) {
+      Alert.alert('Missing Address', 'Please add a delivery address before placing the order.');
+      return;
+    }
+    isSubmitting.current = true;
+    placeOrderMutation.mutate();
+  };
 
   if (items.length === 0) {
     return (
@@ -67,7 +97,6 @@ export default function CartScreen() {
   }
 
   const subtotal = getSubtotal();
-  const deliveryFee = 30;
   const tax = Math.round((subtotal - discount) * 0.05);
   const total = subtotal + deliveryFee + tax - discount;
 
@@ -75,9 +104,9 @@ export default function CartScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Card>
         <Text style={styles.restaurantName}>{restaurantName}</Text>
-        {items.map((item) => (
+        {items.map((item, index) => (
           <CartItemRow
-            key={item.menuItemId}
+            key={`${item.menuItemId}-${item.variant ?? ''}-${item.addons.join(',')}-${index}`}
             menuItemId={item.menuItemId}
             name={item.name}
             price={item.price}
@@ -108,7 +137,10 @@ export default function CartScreen() {
           <Input
             placeholder="Enter coupon code"
             value={couponCode}
-            onChangeText={setCouponCode}
+            onChangeText={(text: string) => {
+              setCouponCode(text);
+              if (discount > 0) setDiscount(0);
+            }}
           />
           <Button
             title="Apply"
@@ -116,10 +148,29 @@ export default function CartScreen() {
             variant="outline"
             size="sm"
             loading={applyCouponMutation.isPending}
-            disabled={!couponCode}
+            disabled={!couponCode.trim()}
           />
         </View>
         {discount > 0 && <Text style={styles.discountText}>-₹{discount} applied!</Text>}
+      </Card>
+
+      <Card style={styles.section}>
+        <Text style={styles.sectionTitle}>Payment Method</Text>
+        <TouchableOpacity style={[styles.paymentOption, styles.paymentSelected]}>
+          <View style={styles.paymentRadio}>
+            <View style={styles.paymentRadioInner} />
+          </View>
+          <Text style={styles.paymentLabel}>Cash on Delivery</Text>
+        </TouchableOpacity>
+        {(['UPI', 'Card', 'Wallet'] as const).map((method) => (
+          <View key={method} style={[styles.paymentOption, styles.paymentDisabled]}>
+            <View style={styles.paymentRadioEmpty} />
+            <Text style={styles.paymentLabelDisabled}>{method}</Text>
+            <View style={styles.comingSoonBadge}>
+              <Text style={styles.comingSoonText}>Coming Soon</Text>
+            </View>
+          </View>
+        ))}
       </Card>
 
       <Card style={styles.section}>
@@ -151,9 +202,9 @@ export default function CartScreen() {
 
       <Button
         title={`Place Order · ₹${total}`}
-        onPress={() => placeOrderMutation.mutate()}
+        onPress={handlePlaceOrder}
         loading={placeOrderMutation.isPending}
-        disabled={!addressId}
+        disabled={!addressId || placeOrderMutation.isPending}
         fullWidth
         size="lg"
         style={styles.placeBtn}
@@ -177,5 +228,15 @@ const styles = StyleSheet.create({
   discountValue: { color: COLORS.success },
   totalLabel: { fontSize: FONT_SIZE.lg, fontWeight: '700', color: COLORS.text },
   totalValue: { fontSize: FONT_SIZE.lg, fontWeight: '700', color: COLORS.text },
+  paymentOption: { flexDirection: 'row', alignItems: 'center', paddingVertical: SPACING.sm, gap: SPACING.sm },
+  paymentSelected: { opacity: 1 },
+  paymentDisabled: { opacity: 0.5 },
+  paymentRadio: { width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: COLORS.primary, alignItems: 'center', justifyContent: 'center' },
+  paymentRadioInner: { width: 10, height: 10, borderRadius: 5, backgroundColor: COLORS.primary },
+  paymentRadioEmpty: { width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: COLORS.textLight },
+  paymentLabel: { fontSize: FONT_SIZE.md, color: COLORS.text, fontWeight: '600' },
+  paymentLabelDisabled: { fontSize: FONT_SIZE.md, color: COLORS.textSecondary, flex: 1 },
+  comingSoonBadge: { backgroundColor: COLORS.warning, paddingHorizontal: SPACING.sm, paddingVertical: 2, borderRadius: RADIUS.sm },
+  comingSoonText: { fontSize: FONT_SIZE.xs, color: COLORS.secondary, fontWeight: '700' },
   placeBtn: { marginTop: SPACING.xl },
 });

@@ -1,13 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Linking } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { OrderStatus } from '@food-delivery/shared';
 import { deliveryApi } from '../../src/services/delivery.service';
-import { io } from 'socket.io-client';
-import * as SecureStore from 'expo-secure-store';
-
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000';
+import { apiClient } from '../../src/lib/api-client';
 
 export default function ActiveDeliveryScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -16,33 +13,10 @@ export default function ActiveDeliveryScreen() {
 
   const { data: order, refetch } = useQuery({
     queryKey: ['activeOrder', id],
-    queryFn: async () => {
-      const profile = await deliveryApi.getProfile();
-      // Fetch order details through a general endpoint
-      const response = await fetch(`${API_URL}/api/orders/${id}`, {
-        headers: {
-          Authorization: `Bearer ${await SecureStore.getItemAsync('accessToken')}`,
-        },
-      });
-      const data = await response.json();
-      return data.data;
-    },
+    queryFn: () => apiClient.get(`/orders/${id}`).then((r) => r.data.data),
     enabled: !!id,
-    refetchInterval: 15000,
+    refetchInterval: 10000,
   });
-
-  // Socket for real-time updates
-  useEffect(() => {
-    let socket: ReturnType<typeof io> | null = null;
-    const connect = async () => {
-      const token = await SecureStore.getItemAsync('accessToken');
-      socket = io(`${API_URL}/orders`, { auth: { token }, transports: ['websocket'] });
-      socket.emit('join-order', id);
-      socket.on('order-updated', () => refetch());
-    };
-    connect();
-    return () => { socket?.disconnect(); };
-  }, [id, refetch]);
 
   const updateStatusMutation = useMutation({
     mutationFn: (status: string) => deliveryApi.updateOrderStatus(id, status),

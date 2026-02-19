@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import React from 'react';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { type IAddress } from '@food-delivery/shared';
 import { addressApi } from '../../src/services/address.service';
@@ -7,6 +8,7 @@ import { Card, Button, EmptyState } from '../../src/components/ui';
 import { COLORS, SPACING, FONT_SIZE, RADIUS } from '../../src/constants/theme';
 
 export default function AddressScreen() {
+  const router = useRouter();
   const queryClient = useQueryClient();
 
   const { data: addresses, isLoading } = useQuery({
@@ -17,6 +19,7 @@ export default function AddressScreen() {
   const deleteMutation = useMutation({
     mutationFn: addressApi.remove,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['addresses'] }),
+    onError: (err: Error) => Alert.alert('Delete Failed', err.message),
   });
 
   const setDefaultMutation = useMutation({
@@ -58,12 +61,25 @@ export default function AddressScreen() {
     </Card>
   );
 
-  if (!isLoading && (!addresses || addresses.length === 0)) {
+  if (isLoading) {
     return (
-      <EmptyState
-        title="No addresses saved"
-        message="Add a delivery address to get started"
-      />
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    );
+  }
+
+  if (!addresses || addresses.length === 0) {
+    return (
+      <View style={styles.container}>
+        <EmptyState
+          title="No addresses saved"
+          message="Add a delivery address to get started"
+        />
+        <View style={styles.addBtnContainer}>
+          <Button title="+ Add New Address" onPress={() => router.push('/address/add')} fullWidth />
+        </View>
+      </View>
     );
   }
 
@@ -74,6 +90,15 @@ export default function AddressScreen() {
         renderItem={renderItem}
         keyExtractor={(item) => item._id}
         contentContainerStyle={styles.list}
+        ListFooterComponent={
+          <Button
+            title="+ Add New Address"
+            onPress={() => router.push('/address/add')}
+            variant="outline"
+            fullWidth
+            style={styles.addBtn}
+          />
+        }
       />
     </View>
   );
@@ -81,6 +106,7 @@ export default function AddressScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.background },
   list: { padding: SPACING.lg },
   addressCard: { marginBottom: SPACING.md },
   row: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, marginBottom: SPACING.sm },
@@ -93,4 +119,6 @@ const styles = StyleSheet.create({
   actions: { flexDirection: 'row', gap: SPACING.lg, marginTop: SPACING.md },
   actionText: { fontSize: FONT_SIZE.sm, color: COLORS.primary, fontWeight: '600' },
   deleteText: { color: COLORS.error },
+  addBtn: { marginTop: SPACING.md },
+  addBtnContainer: { padding: SPACING.lg },
 });

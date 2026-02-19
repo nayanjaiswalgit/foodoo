@@ -7,16 +7,21 @@ interface CartItem {
   quantity: number;
   variant?: string;
   addons: string[];
+  addonPrices: number[];
   image?: string;
 }
+
+/** Unique key for a cart item based on menuItemId + variant + addons */
+const cartItemKey = (item: { menuItemId: string; variant?: string; addons: string[] }): string =>
+  `${item.menuItemId}|${item.variant ?? ''}|${[...item.addons].sort().join(',')}`;
 
 interface CartState {
   restaurantId: string | null;
   restaurantName: string | null;
   items: CartItem[];
   addItem: (restaurantId: string, restaurantName: string, item: CartItem) => boolean;
-  removeItem: (menuItemId: string) => void;
-  updateQuantity: (menuItemId: string, quantity: number) => void;
+  removeItem: (menuItemId: string, variant?: string, addons?: string[]) => void;
+  updateQuantity: (menuItemId: string, quantity: number, variant?: string, addons?: string[]) => void;
   clearCart: () => void;
   getSubtotal: () => number;
   getItemCount: () => number;
@@ -35,19 +40,14 @@ export const useCartStore = create<CartState>((set, get) => ({
       return false; // Signal caller to show confirmation
     }
 
-    const existing = state.items.find(
-      (i) =>
-        i.menuItemId === item.menuItemId &&
-        i.variant === item.variant &&
-        JSON.stringify(i.addons) === JSON.stringify(item.addons)
-    );
+    const newKey = cartItemKey(item);
+    const existingIndex = state.items.findIndex((i) => cartItemKey(i) === newKey);
 
-    if (existing) {
-      set({
-        items: state.items.map((i) =>
-          i === existing ? { ...i, quantity: i.quantity + item.quantity } : i
-        ),
-      });
+    if (existingIndex >= 0) {
+      const updated = [...state.items];
+      const existing = updated[existingIndex]!;
+      updated[existingIndex] = { ...existing, quantity: existing.quantity + item.quantity };
+      set({ items: updated });
     } else {
       set({
         restaurantId,
@@ -58,8 +58,9 @@ export const useCartStore = create<CartState>((set, get) => ({
     return true;
   },
 
-  removeItem: (menuItemId) => {
-    const items = get().items.filter((i) => i.menuItemId !== menuItemId);
+  removeItem: (menuItemId, variant, addons) => {
+    const key = cartItemKey({ menuItemId, variant, addons: addons ?? [] });
+    const items = get().items.filter((i) => cartItemKey(i) !== key);
     if (items.length === 0) {
       set({ items: [], restaurantId: null, restaurantName: null });
     } else {
@@ -67,14 +68,15 @@ export const useCartStore = create<CartState>((set, get) => ({
     }
   },
 
-  updateQuantity: (menuItemId, quantity) => {
+  updateQuantity: (menuItemId, quantity, variant, addons) => {
     if (quantity <= 0) {
-      get().removeItem(menuItemId);
+      get().removeItem(menuItemId, variant, addons);
       return;
     }
+    const key = cartItemKey({ menuItemId, variant, addons: addons ?? [] });
     set({
       items: get().items.map((i) =>
-        i.menuItemId === menuItemId ? { ...i, quantity } : i
+        cartItemKey(i) === key ? { ...i, quantity } : i
       ),
     });
   },
@@ -82,7 +84,10 @@ export const useCartStore = create<CartState>((set, get) => ({
   clearCart: () => set({ items: [], restaurantId: null, restaurantName: null }),
 
   getSubtotal: () => {
-    return get().items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    return get().items.reduce((sum, item) => {
+      const addonTotal = item.addonPrices.reduce((a, b) => a + b, 0);
+      return sum + (item.price + addonTotal) * item.quantity;
+    }, 0);
   },
 
   getItemCount: () => {

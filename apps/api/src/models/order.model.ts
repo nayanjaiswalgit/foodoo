@@ -39,6 +39,7 @@ export interface IOrderDocument extends Document {
   couponCode?: string;
   specialInstructions?: string;
   estimatedDeliveryTime?: Date;
+  idempotencyKey?: string;
 }
 
 const orderSchema = new Schema<IOrderDocument>(
@@ -91,6 +92,7 @@ const orderSchema = new Schema<IOrderDocument>(
     couponCode: String,
     specialInstructions: String,
     estimatedDeliveryTime: Date,
+    idempotencyKey: { type: String, sparse: true },
   },
   { timestamps: true }
 );
@@ -99,5 +101,8 @@ orderSchema.index({ customer: 1, createdAt: -1 });
 orderSchema.index({ restaurant: 1, status: 1 });
 orderSchema.index({ deliveryPartner: 1, status: 1 });
 orderSchema.index({ orderNumber: 1 });
+orderSchema.index({ idempotencyKey: 1, customer: 1 }, { unique: true, sparse: true });
+orderSchema.index({ createdAt: -1 });
+orderSchema.index({ 'deliveryAddress.location': '2dsphere' });
 
 export const Order = mongoose.model<IOrderDocument>('Order', orderSchema);

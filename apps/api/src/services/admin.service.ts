@@ -40,7 +40,10 @@ export const listUsers = async (page: number, limit: number, role?: string) => {
   return { users, total };
 };
 
-export const toggleUserActive = async (userId: string) => {
+export const toggleUserActive = async (userId: string, adminId: string) => {
+  if (userId === adminId) {
+    throw ApiError.badRequest('Cannot deactivate your own account');
+  }
   const user = await User.findById(userId);
   if (!user) throw ApiError.notFound('User not found');
   user.isActive = !user.isActive;
@@ -67,6 +70,9 @@ export const toggleRestaurantActive = async (restaurantId: string) => {
 };
 
 export const updateCommission = async (restaurantId: string, commission: number) => {
+  if (typeof commission !== 'number' || isNaN(commission) || commission < 0 || commission > 50) {
+    throw ApiError.badRequest('Commission must be between 0 and 50 percent');
+  }
   const restaurant = await Restaurant.findByIdAndUpdate(
     restaurantId,
     { commission },

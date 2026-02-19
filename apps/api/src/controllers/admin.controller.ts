@@ -16,7 +16,7 @@ export const listUsers = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const toggleUserActive = asyncHandler(async (req: Request, res: Response) => {
-  const user = await adminService.toggleUserActive((req.params.id as string));
+  const user = await adminService.toggleUserActive(req.params.id as string, req.user!._id);
   sendResponse(res, 200, user);
 });
 

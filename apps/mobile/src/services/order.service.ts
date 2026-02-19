@@ -2,8 +2,10 @@ import { type PlaceOrderInput, type IOrder, type PaginatedResponse } from '@food
 import { apiClient } from '../lib/api-client';
 
 export const orderApi = {
-  place: (data: PlaceOrderInput) =>
-    apiClient.post<{ data: IOrder }>('/orders', data).then((r) => r.data.data),
+  place: (data: PlaceOrderInput, idempotencyKey?: string) =>
+    apiClient.post<{ data: IOrder }>('/orders', data, {
+      ...(idempotencyKey && { headers: { 'X-Idempotency-Key': idempotencyKey } }),
+    }).then((r) => r.data.data),
 
   getMyOrders: (page = 1, limit = 10) =>
     apiClient.get<PaginatedResponse<IOrder>>('/orders/my', { params: { page, limit } }).then((r) => r.data),

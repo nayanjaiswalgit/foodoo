@@ -76,7 +76,12 @@ export function UsersPage() {
                   </td>
                   <td className="px-6 py-4">
                     <button
-                      onClick={() => toggleMutation.mutate(user._id as string)}
+                      onClick={() => {
+                        const action = user.isActive ? 'deactivate' : 'activate';
+                        if (window.confirm(`Are you sure you want to ${action} "${user.name}"?`)) {
+                          toggleMutation.mutate(user._id as string);
+                        }
+                      }}
                       className={`text-xs font-medium ${user.isActive ? 'text-red-600' : 'text-green-600'} hover:underline`}
                     >
                       {user.isActive ? 'Deactivate' : 'Activate'}

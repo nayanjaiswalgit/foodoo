@@ -52,27 +52,31 @@ export const listRestaurants = async (query: ListQuery) => {
 };
 
 export const getNearby = async (lat: number, lng: number, radius = 5) => {
+  const cappedRadius = Math.min(Math.max(radius, 1), 50);
   return Restaurant.find({
     isActive: true,
     'address.location': {
       $nearSphere: {
         $geometry: { type: 'Point', coordinates: [lng, lat] },
-        $maxDistance: radius * 1000,
+        $maxDistance: cappedRadius * 1000,
       },
     },
   }).limit(20);
 };
 
 export const getById = async (id: string) => {
-  const restaurant = await Restaurant.findById(id).populate('owner', 'name email phone');
+  const restaurant = await Restaurant.findById(id).populate('owner', 'name');
   if (!restaurant) throw ApiError.notFound('Restaurant not found');
   return restaurant;
 };
 
-export const getMenu = async (restaurantId: string) => {
+export const getMenu = async (restaurantId: string, page = 1, limit = 100) => {
+  const cappedLimit = Math.min(limit, 200);
   return MenuItem.find({ restaurant: restaurantId, isAvailable: true })
     .populate('category', 'name slug')
-    .sort({ sortOrder: 1 });
+    .sort({ sortOrder: 1 })
+    .skip((page - 1) * cappedLimit)
+    .limit(cappedLimit);
 };
 
 export const create = async (ownerId: string, data: CreateRestaurantInput) => {

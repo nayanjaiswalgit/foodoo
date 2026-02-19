@@ -5,6 +5,7 @@ import { useAuthStore } from '../stores/auth.store';
 
 export const useLocationTracking = () => {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const inFlightRef = useRef(false);
   const isOnline = useAuthStore((s) => s.isOnline);
 
   const startTracking = useCallback(async () => {
@@ -12,6 +13,8 @@ export const useLocationTracking = () => {
     if (status !== 'granted') return;
 
     intervalRef.current = setInterval(async () => {
+      if (inFlightRef.current) return;
+      inFlightRef.current = true;
       try {
         const loc = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.High,
@@ -19,6 +22,8 @@ export const useLocationTracking = () => {
         await deliveryApi.updateLocation([loc.coords.longitude, loc.coords.latitude]);
       } catch {
         // Silently handle location errors during tracking
+      } finally {
+        inFlightRef.current = false;
       }
     }, 10000);
   }, []);

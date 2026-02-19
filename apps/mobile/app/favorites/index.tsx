@@ -1,5 +1,5 @@
 import React from 'react';
-import { FlatList, StyleSheet, RefreshControl } from 'react-native';
+import { FlatList, StyleSheet, RefreshControl, Alert } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { type IRestaurant } from '@food-delivery/shared';
 import { apiClient } from '../../src/lib/api-client';
@@ -23,14 +23,14 @@ export default function FavoritesScreen() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
     },
+    onError: (err: Error) => Alert.alert('Error', err.message || 'Failed to update favorite'),
   });
 
   if (!isLoading && favorites.length === 0) {
     return (
       <EmptyState
-        icon="❤️"
         title="No favorites yet"
-        subtitle="Like restaurants to see them here"
+        message="Like restaurants to see them here"
       />
     );
   }

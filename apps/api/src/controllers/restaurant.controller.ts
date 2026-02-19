@@ -22,7 +22,11 @@ export const list = asyncHandler(async (req: Request, res: Response) => {
 export const nearby = asyncHandler(async (req: Request, res: Response) => {
   const lat = Number(req.query.lat);
   const lng = Number(req.query.lng);
-  const radius = Number(req.query.radius) || 5;
+  if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+    res.status(400).json({ success: false, message: 'Valid lat and lng are required' });
+    return;
+  }
+  const radius = Math.min(Number(req.query.radius) || 5, 50);
   const restaurants = await restaurantService.getNearby(lat, lng, radius);
   sendResponse(res, 200, restaurants);
 });

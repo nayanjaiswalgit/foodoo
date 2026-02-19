@@ -55,6 +55,7 @@ export default function RestaurantDetailScreen() {
         price: item.price,
         quantity: 1,
         addons: [],
+        addonPrices: [],
         image: item.image,
       });
 
@@ -75,6 +76,7 @@ export default function RestaurantDetailScreen() {
                   price: item.price,
                   quantity: 1,
                   addons: [],
+                  addonPrices: [],
                   image: item.image,
                 });
               },
@@ -122,7 +124,7 @@ export default function RestaurantDetailScreen() {
                 <Card key={review._id} style={styles.reviewCard}>
                   <View style={styles.reviewHeader}>
                     <Text style={styles.reviewUser}>
-                      {typeof review.user === 'object' ? review.user.name : 'Customer'}
+                      {typeof review.user === 'object' ? (review.user as { name: string }).name : 'Customer'}
                     </Text>
                     <Text style={styles.reviewStars}>
                       {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}

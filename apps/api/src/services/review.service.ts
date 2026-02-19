@@ -12,16 +12,28 @@ export const createReview = async (userId: string, data: CreateReviewInput) => {
   });
   if (!order) throw ApiError.badRequest('Can only review delivered orders');
 
+  // Verify the review restaurant matches the order's restaurant
+  if (order.restaurant.toString() !== data.restaurant) {
+    throw ApiError.badRequest('Restaurant does not match the order');
+  }
+
   const existing = await Review.findOne({ order: data.order });
   if (existing) throw ApiError.conflict('Already reviewed this order');
 
   const review = await Review.create({ ...data, user: userId });
 
-  const reviews = await Review.find({ restaurant: data.restaurant });
-  const avg = reviews.reduce((s, r) => s + r.rating, 0) / reviews.length;
-  await Restaurant.findByIdAndUpdate(data.restaurant, {
-    rating: { average: Math.round(avg * 10) / 10, count: reviews.length },
-  });
+  // Atomic rating update using running average formula
+  const restaurant = await Restaurant.findById(data.restaurant);
+  if (restaurant) {
+    const oldCount = restaurant.rating?.count ?? 0;
+    const oldAvg = restaurant.rating?.average ?? 0;
+    const newCount = oldCount + 1;
+    const newAvg = Math.round(((oldAvg * oldCount + data.rating) / newCount) * 10) / 10;
+
+    await Restaurant.findByIdAndUpdate(data.restaurant, {
+      rating: { average: newAvg, count: newCount },
+    });
+  }
 
   return review;
 };
@@ -47,10 +59,10 @@ export const replyToReview = async (
   reviewId: string,
   text: string
 ) => {
-  const review = await Review.findById(reviewId).populate('restaurant', 'owner');
+  const review = await Review.findById(reviewId).populate<{ restaurant: { _id: string; owner: { toString(): string } } }>('restaurant', 'owner');
   if (!review) throw ApiError.notFound('Review not found');
 
-  const restaurant = await Restaurant.findById(review.restaurant);
+  const restaurant = review.restaurant as { _id: string; owner: { toString(): string } };
   if (!restaurant || restaurant.owner.toString() !== ownerId) {
     throw ApiError.forbidden('Not your restaurant');
   }

@@ -12,6 +12,7 @@ export interface IUserDocument extends Document {
   favorites: mongoose.Types.ObjectId[];
   otp?: string;
   otpExpiry?: Date;
+  otpAttempts: number;
   isVerified: boolean;
   isActive: boolean;
   refreshToken?: string;
@@ -29,6 +30,7 @@ const userSchema = new Schema<IUserDocument>(
     favorites: [{ type: Schema.Types.ObjectId, ref: 'Restaurant' }],
     otp: { type: String, select: false },
     otpExpiry: { type: Date, select: false },
+    otpAttempts: { type: Number, default: 0, select: false },
     isVerified: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
     refreshToken: { type: String, select: false },

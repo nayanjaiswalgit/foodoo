@@ -30,7 +30,13 @@ export const refreshTokenSchema = z.object({
   refreshToken: z.string().min(1, 'Refresh token is required'),
 });
 
+export const updateProfileSchema = z.object({
+  name: z.string().min(2).max(50).optional(),
+  avatar: z.string().url('Invalid avatar URL').max(500).optional(),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type SendOtpInput = z.infer<typeof sendOtpSchema>;
 export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;

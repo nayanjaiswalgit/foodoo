@@ -3,19 +3,22 @@ import { ScrollView, StyleSheet, Alert } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Input, Card } from '../../src/components/ui';
 import { useAuth } from '../../src/hooks/use-auth';
+import { useAuthStore } from '../../src/stores/auth.store';
 import { apiClient } from '../../src/lib/api-client';
 import { COLORS, SPACING } from '../../src/constants/theme';
 
 export default function ProfileScreen() {
   const { user } = useAuth();
+  const setUser = useAuthStore((s) => s.setUser);
   const queryClient = useQueryClient();
   const [name, setName] = useState(user?.name ?? '');
 
   const updateMutation = useMutation({
     mutationFn: (data: { name: string }) =>
-      apiClient.patch('/users/profile', data).then((r) => r.data),
-    onSuccess: () => {
+      apiClient.patch<{ data: { name: string } }>('/users/profile', data).then((r) => r.data.data),
+    onSuccess: (updatedUser) => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
+      if (user) setUser({ ...user, name: updatedUser.name ?? name });
       Alert.alert('Success', 'Profile updated');
     },
     onError: () => Alert.alert('Error', 'Failed to update profile'),

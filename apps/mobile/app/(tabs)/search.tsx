@@ -12,7 +12,7 @@ export default function SearchScreen() {
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebounce(query, 400);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['search', debouncedQuery],
     queryFn: () => restaurantApi.list({ search: debouncedQuery, limit: 20 }),
     enabled: debouncedQuery.length >= 2,
@@ -38,6 +38,8 @@ export default function SearchScreen() {
             <RestaurantCardSkeleton key={i} />
           ))}
         </View>
+      ) : isError ? (
+        <EmptyState title="Something went wrong" message="Failed to load restaurants. Please try again." />
       ) : debouncedQuery.length < 2 ? (
         <EmptyState title="Search for food" message="Type at least 2 characters to search" />
       ) : restaurants.length === 0 ? (

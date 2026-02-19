@@ -1,48 +1,93 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { orderApi } from '../../src/services/order.service';
 import { Card, Badge, Divider, Button } from '../../src/components/ui';
 import { useSocket } from '../../src/hooks/use-socket';
-import { COLORS, SPACING, FONT_SIZE, RADIUS } from '../../src/constants/theme';
+import { COLORS, SPACING, FONT_SIZE } from '../../src/constants/theme';
 
 const STATUS_LABELS: Record<string, string> = {
-  placed: '🟠 Order Placed',
-  confirmed: '🔵 Confirmed',
-  preparing: '🟡 Preparing',
-  ready: '🟢 Ready for Pickup',
-  picked_up: '🔵 Picked Up',
-  on_the_way: '🚚 On the Way',
-  delivered: '✅ Delivered',
-  cancelled: '❌ Cancelled',
+  placed: 'Order Placed',
+  confirmed: 'Confirmed',
+  preparing: 'Preparing',
+  ready: 'Ready for Pickup',
+  picked_up: 'Picked Up',
+  on_the_way: 'On the Way',
+  delivered: 'Delivered',
+  cancelled: 'Cancelled',
 };
 
 export default function OrderDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { emit } = useSocket('orders');
+  const queryClient = useQueryClient();
+  const { emit, on } = useSocket('orders');
 
-  const { data: order, refetch } = useQuery({
+  const { data: order, refetch, isLoading, isError } = useQuery({
     queryKey: ['order', id],
     queryFn: () => orderApi.getById(id),
     enabled: !!id,
     refetchInterval: 10000,
   });
 
-  React.useEffect(() => {
-    if (id) emit('join-order', id);
-    return () => {
-      if (id) emit('leave-order', id);
-    };
-  }, [id, emit]);
+  const cancelMutation = useMutation({
+    mutationFn: () => orderApi.cancel(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['order', id] });
+      queryClient.invalidateQueries({ queryKey: ['myOrders'] });
+      refetch();
+    },
+    onError: (err: Error) => Alert.alert('Cancel Failed', err.message),
+  });
 
-  if (!order) return null;
+  React.useEffect(() => {
+    if (!id) return;
+    emit('join-order', id);
+
+    const unsub = on('order-status-updated', () => {
+      refetch();
+    });
+
+    return () => {
+      emit('leave-order', id);
+      unsub();
+    };
+  }, [id, emit, on, refetch]);
+
+  if (isLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    );
+  }
+
+  if (isError || !order) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.errorText}>Failed to load order</Text>
+        <Button title="Retry" onPress={() => refetch()} variant="outline" size="sm" />
+      </View>
+    );
+  }
 
   const canCancel = order.status === 'placed' || order.status === 'confirmed';
   const isDelivered = order.status === 'delivered';
-  const restaurantId = typeof order.restaurant === 'string' ? order.restaurant : order.restaurant?._id;
-  const restaurantName = typeof order.restaurant === 'object' ? order.restaurant?.name : undefined;
+  const restaurantData = order.restaurant as string | { _id: string; name: string };
+  const restaurantId = typeof restaurantData === 'string' ? restaurantData : restaurantData?._id;
+  const restaurantName = typeof restaurantData === 'object' ? restaurantData?.name : undefined;
+
+  const handleCancel = () => {
+    Alert.alert(
+      'Cancel Order',
+      'Are you sure you want to cancel this order?',
+      [
+        { text: 'No', style: 'cancel' },
+        { text: 'Yes, Cancel', style: 'destructive', onPress: () => cancelMutation.mutate() },
+      ]
+    );
+  };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -64,11 +109,12 @@ export default function OrderDetailScreen() {
             <View style={styles.timelineDot} />
             <View style={styles.timelineContent}>
               <Text style={styles.timelineStatus}>
-                {entry.status.replace(/_/g, ' ').toUpperCase()}
+                {STATUS_LABELS[entry.status] ?? entry.status.replace(/_/g, ' ').toUpperCase()}
               </Text>
               <Text style={styles.timelineTime}>
                 {new Date(entry.timestamp).toLocaleTimeString()}
               </Text>
+              {entry.note && <Text style={styles.timelineNote}>{entry.note}</Text>}
             </View>
           </View>
         ))}
@@ -80,12 +126,37 @@ export default function OrderDetailScreen() {
         {order.items.map((item, i) => (
           <View key={i} style={styles.itemRow}>
             <Text style={styles.itemQty}>{item.quantity}x</Text>
-            <Text style={styles.itemName}>{item.name}</Text>
+            <View style={styles.itemInfo}>
+              <Text style={styles.itemName}>{item.name}</Text>
+              {item.variant && <Text style={styles.itemMeta}>Variant: {item.variant}</Text>}
+              {item.addons.length > 0 && (
+                <Text style={styles.itemMeta}>Addons: {item.addons.join(', ')}</Text>
+              )}
+            </View>
             <Text style={styles.itemPrice}>₹{item.itemTotal}</Text>
           </View>
         ))}
         <Divider />
-        <View style={styles.itemRow}>
+        <View style={styles.summaryRow}>
+          <Text style={styles.summaryLabel}>Subtotal</Text>
+          <Text style={styles.summaryValue}>₹{order.pricing.subtotal}</Text>
+        </View>
+        <View style={styles.summaryRow}>
+          <Text style={styles.summaryLabel}>Delivery Fee</Text>
+          <Text style={styles.summaryValue}>₹{order.pricing.deliveryFee}</Text>
+        </View>
+        <View style={styles.summaryRow}>
+          <Text style={styles.summaryLabel}>Tax</Text>
+          <Text style={styles.summaryValue}>₹{order.pricing.tax}</Text>
+        </View>
+        {order.pricing.discount > 0 && (
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Discount</Text>
+            <Text style={[styles.summaryValue, styles.discountValue]}>-₹{order.pricing.discount}</Text>
+          </View>
+        )}
+        <Divider />
+        <View style={styles.summaryRow}>
           <Text style={styles.totalLabel}>Total</Text>
           <Text style={styles.totalValue}>₹{order.pricing.total}</Text>
         </View>
@@ -95,26 +166,35 @@ export default function OrderDetailScreen() {
       <Card style={styles.section}>
         <Text style={styles.sectionTitle}>Delivery Address</Text>
         <Text style={styles.addressText}>
-          {order.deliveryAddress.addressLine1}, {order.deliveryAddress.city} - {order.deliveryAddress.pincode}
+          {order.deliveryAddress.addressLine1}
+          {order.deliveryAddress.addressLine2 ? `, ${order.deliveryAddress.addressLine2}` : ''}
+          , {order.deliveryAddress.city} - {order.deliveryAddress.pincode}
+        </Text>
+      </Card>
+
+      {/* Payment */}
+      <Card style={styles.section}>
+        <Text style={styles.sectionTitle}>Payment</Text>
+        <Text style={styles.addressText}>
+          Method: {order.payment.method.toUpperCase()} | Status: {order.payment.status}
         </Text>
       </Card>
 
       {canCancel && (
         <Button
           title="Cancel Order"
-          onPress={async () => {
-            await orderApi.cancel(order._id);
-            refetch();
-          }}
+          onPress={handleCancel}
           variant="danger"
           fullWidth
+          loading={cancelMutation.isPending}
+          disabled={cancelMutation.isPending}
           style={styles.cancelBtn}
         />
       )}
 
       {isDelivered && restaurantId && (
         <Button
-          title="⭐ Write a Review"
+          title="Write a Review"
           onPress={() =>
             router.push({
               pathname: '/review/[id]',
@@ -132,6 +212,8 @@ export default function OrderDetailScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   content: { padding: SPACING.lg, paddingBottom: 40 },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: SPACING.xl },
+  errorText: { fontSize: FONT_SIZE.md, color: COLORS.textSecondary, marginBottom: SPACING.md },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   orderNum: { fontSize: FONT_SIZE.xl, fontWeight: '800', color: COLORS.text },
   statusLabel: { fontSize: FONT_SIZE.lg, fontWeight: '600', color: COLORS.primary, marginTop: SPACING.md },
@@ -142,10 +224,17 @@ const styles = StyleSheet.create({
   timelineContent: { flex: 1 },
   timelineStatus: { fontSize: FONT_SIZE.sm, fontWeight: '600', color: COLORS.text },
   timelineTime: { fontSize: FONT_SIZE.xs, color: COLORS.textSecondary, marginTop: 2 },
-  itemRow: { flexDirection: 'row', alignItems: 'center', marginBottom: SPACING.sm },
+  timelineNote: { fontSize: FONT_SIZE.xs, color: COLORS.textSecondary, fontStyle: 'italic', marginTop: 2 },
+  itemRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: SPACING.sm },
   itemQty: { fontSize: FONT_SIZE.sm, fontWeight: '600', color: COLORS.primary, width: 30 },
-  itemName: { flex: 1, fontSize: FONT_SIZE.md, color: COLORS.text },
+  itemInfo: { flex: 1 },
+  itemName: { fontSize: FONT_SIZE.md, color: COLORS.text },
+  itemMeta: { fontSize: FONT_SIZE.xs, color: COLORS.textSecondary, marginTop: 2 },
   itemPrice: { fontSize: FONT_SIZE.md, fontWeight: '600', color: COLORS.text },
+  summaryRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: SPACING.xs },
+  summaryLabel: { fontSize: FONT_SIZE.sm, color: COLORS.textSecondary },
+  summaryValue: { fontSize: FONT_SIZE.sm, color: COLORS.text },
+  discountValue: { color: COLORS.success },
   totalLabel: { flex: 1, fontSize: FONT_SIZE.lg, fontWeight: '700', color: COLORS.text },
   totalValue: { fontSize: FONT_SIZE.lg, fontWeight: '700', color: COLORS.text },
   addressText: { fontSize: FONT_SIZE.sm, color: COLORS.textSecondary, lineHeight: 20 },

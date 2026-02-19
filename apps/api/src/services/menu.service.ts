@@ -20,7 +20,7 @@ export const updateItem = async (
   itemId: string,
   data: UpdateMenuItemInput
 ) => {
-  const item = await MenuItem.findById(itemId).populate('restaurant', 'owner');
+  const item = await MenuItem.findById(itemId);
   if (!item) throw ApiError.notFound('Menu item not found');
 
   const restaurant = await Restaurant.findById(item.restaurant);
@@ -28,7 +28,14 @@ export const updateItem = async (
     throw ApiError.forbidden('Not your restaurant');
   }
 
-  Object.assign(item, data);
+  // Only allow updating safe fields — prevent overwriting restaurant, _id, etc.
+  const allowedFields = ['name', 'description', 'price', 'category', 'isVeg', 'addons', 'variants', 'sortOrder', 'image'] as const;
+  for (const field of allowedFields) {
+    if (field in data && data[field as keyof typeof data] !== undefined) {
+      (item as any)[field] = data[field as keyof typeof data];
+    }
+  }
+
   return item.save();
 };
 

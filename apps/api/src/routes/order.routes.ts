@@ -2,12 +2,13 @@ import { Router } from 'express';
 import { placeOrderSchema, updateOrderStatusSchema, UserRole } from '@food-delivery/shared';
 import { validate } from '../middleware/validate.middleware';
 import { authenticate, authorize } from '../middleware/auth.middleware';
+import { orderLimiter } from '../middleware/rate-limit.middleware';
 import * as orderController from '../controllers/order.controller';
 
 const router: Router = Router();
 
 router.use(authenticate);
-router.post('/', authorize(UserRole.CUSTOMER), validate(placeOrderSchema), orderController.placeOrder);
+router.post('/', orderLimiter, authorize(UserRole.CUSTOMER), validate(placeOrderSchema), orderController.placeOrder);
 router.get('/my', authorize(UserRole.CUSTOMER), orderController.getMyOrders);
 router.get('/:id', orderController.getOrderById);
 router.post('/:id/cancel', authorize(UserRole.CUSTOMER), orderController.cancelOrder);

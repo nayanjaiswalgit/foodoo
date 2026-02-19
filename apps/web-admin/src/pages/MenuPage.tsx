@@ -45,6 +45,17 @@ export function MenuPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['menu'] });
       setShowForm(false);
+      setEditItem(null);
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: { name: string; price: number; category: string; isVeg: boolean; description: string } }) =>
+      restaurantApi.updateMenuItem(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['menu'] });
+      setShowForm(false);
+      setEditItem(null);
     },
   });
 
@@ -71,13 +82,18 @@ export function MenuPage() {
             onSubmit={(e) => {
               e.preventDefault();
               const formData = new FormData(e.currentTarget);
-              createMutation.mutate({
+              const data = {
                 name: formData.get('name') as string,
                 price: Number(formData.get('price')),
                 category: formData.get('category') as string,
                 isVeg: formData.get('isVeg') === 'true',
                 description: formData.get('description') as string,
-              });
+              };
+              if (editItem) {
+                updateMutation.mutate({ id: editItem._id, data });
+              } else {
+                createMutation.mutate(data);
+              }
             }}
             className="grid grid-cols-2 gap-4"
           >
@@ -95,7 +111,7 @@ export function MenuPage() {
             <textarea name="description" placeholder="Description" className="col-span-2 px-4 py-2 border border-gray-200 rounded-lg" defaultValue={editItem?.description} />
             <div className="col-span-2 flex gap-2">
               <button type="submit" className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
-                {createMutation.isPending ? 'Saving...' : 'Save'}
+                {(createMutation.isPending || updateMutation.isPending) ? 'Saving...' : 'Save'}
               </button>
               <button type="button" onClick={() => setShowForm(false)} className="px-6 py-2 border border-gray-200 rounded-lg">
                 Cancel
@@ -150,7 +166,11 @@ export function MenuPage() {
                       Edit
                     </button>
                     <button
-                      onClick={() => deleteMutation.mutate(item._id)}
+                      onClick={() => {
+                        if (window.confirm(`Delete "${item.name}"? This cannot be undone.`)) {
+                          deleteMutation.mutate(item._id);
+                        }
+                      }}
                       className="text-red-600 hover:underline text-xs"
                     >
                       Delete

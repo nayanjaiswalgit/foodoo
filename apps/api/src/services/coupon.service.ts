@@ -35,7 +35,7 @@ export const getAvailableCoupons = async (restaurant?: string) => {
     $expr: { $lt: ['$usedCount', '$usageLimit'] },
   };
   if (restaurant) {
-    filter.$or = [{ restaurant }, { restaurant: { $exists: false } }];
+    filter.$or = [{ restaurant }, { restaurant: null }, { restaurant: { $exists: false } }];
   }
   return Coupon.find(filter).sort({ discountValue: -1 });
 };
@@ -46,8 +46,16 @@ export const createCoupon = async (data: CreateCouponInput) => {
   return Coupon.create(data);
 };
 
+const COUPON_UPDATABLE_FIELDS = ['discountType', 'discountValue', 'minOrderAmount', 'maxDiscount', 'validFrom', 'validUntil', 'usageLimit', 'isActive', 'restaurant'] as const;
+
 export const updateCoupon = async (couponId: string, data: Partial<CreateCouponInput>) => {
-  const coupon = await Coupon.findByIdAndUpdate(couponId, data, { new: true });
+  const sanitized: Record<string, unknown> = {};
+  for (const field of COUPON_UPDATABLE_FIELDS) {
+    if (field in data && data[field as keyof typeof data] !== undefined) {
+      sanitized[field] = data[field as keyof typeof data];
+    }
+  }
+  const coupon = await Coupon.findByIdAndUpdate(couponId, sanitized, { new: true });
   if (!coupon) throw ApiError.notFound('Coupon not found');
   return coupon;
 };
