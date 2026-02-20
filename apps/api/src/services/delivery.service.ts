@@ -4,6 +4,7 @@ import {
   type OrderStatus as OrderStatusType,
 } from '@food-delivery/shared';
 import { DeliveryPartner } from '../models/delivery-partner.model';
+import { DeliveryEarning } from '../models/delivery-earning.model';
 import { Order } from '../models/order.model';
 import { ApiError } from '../utils/api-error';
 
@@ -132,10 +133,25 @@ export const completeDelivery = async (userId: string, orderId: string) => {
   order.statusHistory.push({ status: OrderStatus.DELIVERED, timestamp: new Date() });
   await order.save();
 
-  const deliveryEarning = Math.round(order.pricing.deliveryFee * 0.8);
+  // Calculate earnings breakdown
+  const baseFee = Math.round(order.pricing.deliveryFee * 0.7);
+  const distanceBonus = Math.round(order.pricing.deliveryFee * 0.1);
+  const tipAmount = 0; // Tips not yet implemented
+  const totalEarning = baseFee + distanceBonus + tipAmount;
 
-  // Update partner stats — if this fails, the order is still marked delivered (acceptable)
-  // The earnings can be reconciled. Order delivery is the critical path.
+  // Create earning record (fire-and-forget for non-critical path)
+  DeliveryEarning.create({
+    partner: userId,
+    order: order._id,
+    baseFee,
+    distanceBonus,
+    tipAmount,
+    totalEarning,
+  }).catch((err: unknown) => {
+    console.error('Failed to create delivery earning record:', err);
+  });
+
+  // Update partner stats
   await DeliveryPartner.findOneAndUpdate(
     { user: userId },
     {
@@ -143,7 +159,7 @@ export const completeDelivery = async (userId: string, orderId: string) => {
       currentOrder: undefined,
       $inc: {
         'stats.totalDeliveries': 1,
-        'stats.totalEarnings': deliveryEarning,
+        'stats.totalEarnings': totalEarning,
       },
     }
   );
@@ -165,35 +181,64 @@ export const getEarnings = async (userId: string) => {
 
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  const deliveredFilter = {
-    deliveryPartner: userId,
-    status: OrderStatus.DELIVERED,
-  };
-
-  const [todayOrders, weekOrders, monthOrders] = await Promise.all([
-    Order.find({ ...deliveredFilter, createdAt: { $gte: todayStart } }).select(
-      'pricing.deliveryFee'
-    ),
-    Order.find({ ...deliveredFilter, createdAt: { $gte: weekStart } }).select(
-      'pricing.deliveryFee'
-    ),
-    Order.find({ ...deliveredFilter, createdAt: { $gte: monthStart } }).select(
-      'pricing.deliveryFee'
-    ),
+  const [todayEarnings, weekEarnings, monthEarnings] = await Promise.all([
+    DeliveryEarning.aggregate([
+      { $match: { partner: partner.user, createdAt: { $gte: todayStart } } },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: '$totalEarning' },
+          count: { $sum: 1 },
+        },
+      },
+    ]),
+    DeliveryEarning.aggregate([
+      { $match: { partner: partner.user, createdAt: { $gte: weekStart } } },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: '$totalEarning' },
+          count: { $sum: 1 },
+        },
+      },
+    ]),
+    DeliveryEarning.aggregate([
+      { $match: { partner: partner.user, createdAt: { $gte: monthStart } } },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: '$totalEarning' },
+          count: { $sum: 1 },
+        },
+      },
+    ]),
   ]);
-
-  const calcEarnings = (orders: typeof todayOrders) =>
-    orders.reduce((sum, o) => sum + Math.round(o.pricing.deliveryFee * 0.8), 0);
 
   return {
     totalDeliveries: partner.stats.totalDeliveries,
     totalEarnings: partner.stats.totalEarnings,
     rating: partner.stats.rating.average,
-    todayDeliveries: todayOrders.length,
-    todayEarnings: calcEarnings(todayOrders),
-    weekDeliveries: weekOrders.length,
-    weekEarnings: calcEarnings(weekOrders),
-    monthDeliveries: monthOrders.length,
-    monthEarnings: calcEarnings(monthOrders),
+    todayDeliveries: todayEarnings[0]?.count ?? 0,
+    todayEarnings: todayEarnings[0]?.total ?? 0,
+    weekDeliveries: weekEarnings[0]?.count ?? 0,
+    weekEarnings: weekEarnings[0]?.total ?? 0,
+    monthDeliveries: monthEarnings[0]?.count ?? 0,
+    monthEarnings: monthEarnings[0]?.total ?? 0,
   };
+};
+
+export const getEarningsHistory = async (userId: string, page: number, limit: number) => {
+  const partner = await DeliveryPartner.findOne({ user: userId });
+  if (!partner) throw ApiError.notFound('Partner not found');
+
+  const [earnings, total] = await Promise.all([
+    DeliveryEarning.find({ partner: partner.user })
+      .populate('order', 'orderNumber')
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit),
+    DeliveryEarning.countDocuments({ partner: partner.user }),
+  ]);
+
+  return { earnings, total };
 };

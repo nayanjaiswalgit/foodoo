@@ -6,7 +6,7 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   setUser: (user: IUser) => void;
-  setTokens: (accessToken: string, refreshToken: string) => void;
+  setTokens: (accessToken: string) => void;
   logout: () => void;
   hydrate: () => boolean;
   setLoading: (loading: boolean) => void;
@@ -19,22 +19,18 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setUser: (user) => set({ user, isAuthenticated: true, isLoading: false }),
 
-  setTokens: (accessToken, refreshToken) => {
+  setTokens: (accessToken) => {
     localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('refreshToken', refreshToken);
   },
 
   logout: () => {
     localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
     set({ user: null, isAuthenticated: false, isLoading: false });
   },
 
   hydrate: () => {
     const token = localStorage.getItem('accessToken');
     if (token) {
-      // Token exists; mark as potentially authenticated.
-      // The actual user data will be fetched by ProtectedRoute or an API call.
       set({ isAuthenticated: true, isLoading: false });
       return true;
     }

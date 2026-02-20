@@ -68,6 +68,14 @@ export default function LoginScreen() {
           <Button title="Sign In" onPress={handleLogin} loading={login.isPending} fullWidth />
 
           <Button
+            title="Forgot password?"
+            onPress={() => router.push('/auth/forgot-password')}
+            variant="ghost"
+            fullWidth
+            style={styles.forgotBtn}
+          />
+
+          <Button
             title="Create Account"
             onPress={() => router.push('/auth/register')}
             variant="ghost"
@@ -96,5 +104,6 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
     borderRadius: 8,
   },
+  forgotBtn: { marginTop: SPACING.sm },
   registerBtn: { marginTop: SPACING.md },
 });

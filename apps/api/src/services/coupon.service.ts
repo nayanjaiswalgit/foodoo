@@ -1,8 +1,9 @@
 import { type CreateCouponInput, type ValidateCouponInput } from '@food-delivery/shared';
 import { Coupon } from '../models/coupon.model';
+import { CouponUsage } from '../models/coupon-usage.model';
 import { ApiError } from '../utils/api-error';
 
-export const validateCoupon = async (input: ValidateCouponInput) => {
+export const validateCoupon = async (input: ValidateCouponInput, userId?: string) => {
   const coupon = await Coupon.findOne({
     code: input.code.toUpperCase(),
     isActive: true,
@@ -17,6 +18,14 @@ export const validateCoupon = async (input: ValidateCouponInput) => {
   }
   if (coupon.restaurant && input.restaurant !== coupon.restaurant.toString()) {
     throw ApiError.badRequest('Coupon not valid for this restaurant');
+  }
+
+  // Check per-user usage limit
+  if (userId && coupon.maxUsagePerUser > 0) {
+    const usage = await CouponUsage.findOne({ coupon: coupon._id, user: userId });
+    if (usage && usage.count >= coupon.maxUsagePerUser) {
+      throw ApiError.badRequest('You have reached the usage limit for this coupon');
+    }
   }
 
   const discount =
@@ -54,6 +63,7 @@ const COUPON_UPDATABLE_FIELDS = [
   'validFrom',
   'validUntil',
   'usageLimit',
+  'maxUsagePerUser',
   'isActive',
   'restaurant',
 ] as const;

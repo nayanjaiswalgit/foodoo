@@ -1,5 +1,13 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, ScrollView, StyleSheet, Alert, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  Alert,
+  TouchableOpacity,
+  Pressable,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { PaymentMethod } from '@food-delivery/shared';
@@ -10,6 +18,7 @@ import { addressApi } from '../../src/services/address.service';
 import { orderApi } from '../../src/services/order.service';
 import { couponApi } from '../../src/services/coupon.service';
 import { restaurantApi } from '../../src/services/restaurant.service';
+import { AddressPicker } from '../../src/components/cart/AddressPicker';
 import { COLORS, SPACING, FONT_SIZE, RADIUS } from '../../src/constants/theme';
 
 export default function CartScreen() {
@@ -19,6 +28,7 @@ export default function CartScreen() {
   const [couponCode, setCouponCode] = useState('');
   const [discount, setDiscount] = useState(0);
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
+  const [showAddressPicker, setShowAddressPicker] = useState(false);
   const isSubmitting = useRef(false);
 
   const { data: addresses } = useQuery({
@@ -34,6 +44,9 @@ export default function CartScreen() {
 
   const defaultAddress = addresses?.find((a) => a.isDefault) ?? addresses?.[0];
   const addressId = selectedAddress ?? defaultAddress?._id ?? null;
+  const activeAddress = selectedAddress
+    ? (addresses?.find((a) => a._id === selectedAddress) ?? defaultAddress)
+    : defaultAddress;
   const deliveryFee = restaurant?.deliveryFee ?? 30;
 
   const applyCouponMutation = useMutation({
@@ -116,11 +129,20 @@ export default function CartScreen() {
       </Card>
 
       <Card style={styles.section}>
-        <Text style={styles.sectionTitle}>Delivery Address</Text>
-        {defaultAddress ? (
-          <Text style={styles.addressText}>
-            {defaultAddress.label} - {defaultAddress.addressLine1}, {defaultAddress.city}
-          </Text>
+        <View style={styles.addressHeader}>
+          <Text style={styles.sectionTitle}>Delivery Address</Text>
+          {addresses && addresses.length > 0 && (
+            <Pressable onPress={() => setShowAddressPicker(true)}>
+              <Text style={styles.changeLink}>Change</Text>
+            </Pressable>
+          )}
+        </View>
+        {activeAddress ? (
+          <Pressable onPress={() => setShowAddressPicker(true)}>
+            <Text style={styles.addressText}>
+              {activeAddress.label} - {activeAddress.addressLine1}, {activeAddress.city}
+            </Text>
+          </Pressable>
         ) : (
           <Button
             title="Add Address"
@@ -130,6 +152,20 @@ export default function CartScreen() {
           />
         )}
       </Card>
+
+      {addresses && (
+        <AddressPicker
+          visible={showAddressPicker}
+          onClose={() => setShowAddressPicker(false)}
+          addresses={addresses}
+          selectedId={addressId}
+          onSelect={setSelectedAddress}
+          onAddNew={() => {
+            setShowAddressPicker(false);
+            router.push('/address');
+          }}
+        />
+      )}
 
       <Card style={styles.section}>
         <Text style={styles.sectionTitle}>Coupon</Text>
@@ -229,6 +265,8 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     marginBottom: SPACING.sm,
   },
+  addressHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  changeLink: { fontSize: FONT_SIZE.sm, color: COLORS.primary, fontWeight: '600' },
   addressText: { fontSize: FONT_SIZE.sm, color: COLORS.textSecondary },
   couponRow: { flexDirection: 'row', alignItems: 'flex-start', gap: SPACING.sm },
   discountText: {

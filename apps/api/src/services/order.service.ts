@@ -11,6 +11,7 @@ import { MenuItem } from '../models/menu-item.model';
 import { Restaurant } from '../models/restaurant.model';
 import { Address } from '../models/address.model';
 import { Coupon } from '../models/coupon.model';
+import { CouponUsage } from '../models/coupon-usage.model';
 import { ApiError, generateOrderNumber } from '../utils/index';
 import { getIO } from '../socket';
 
@@ -118,13 +119,30 @@ export const placeOrder = async (
 
     if (!coupon) throw ApiError.badRequest('Invalid or expired coupon');
     if (subtotal < coupon.minOrderAmount) {
-      // Rollback the coupon increment since we're rejecting
       await Coupon.findByIdAndUpdate(coupon._id, { $inc: { usedCount: -1 } });
       throw ApiError.badRequest(`Minimum ₹${coupon.minOrderAmount} for this coupon`);
     }
     if (coupon.restaurant && coupon.restaurant.toString() !== input.restaurant) {
       await Coupon.findByIdAndUpdate(coupon._id, { $inc: { usedCount: -1 } });
       throw ApiError.badRequest('Coupon not valid for this restaurant');
+    }
+
+    // Check per-user usage limit
+    if (coupon.maxUsagePerUser > 0) {
+      const usage = await CouponUsage.findOneAndUpdate(
+        { coupon: coupon._id, user: customerId },
+        { $inc: { count: 1 } },
+        { upsert: true, new: true }
+      );
+      if (usage.count > coupon.maxUsagePerUser) {
+        // Rollback both increments
+        await CouponUsage.findOneAndUpdate(
+          { coupon: coupon._id, user: customerId },
+          { $inc: { count: -1 } }
+        );
+        await Coupon.findByIdAndUpdate(coupon._id, { $inc: { usedCount: -1 } });
+        throw ApiError.badRequest('You have reached the usage limit for this coupon');
+      }
     }
 
     couponId = coupon._id as mongoose.Types.ObjectId;
@@ -169,6 +187,10 @@ export const placeOrder = async (
     // If order creation fails and we already incremented coupon, rollback
     if (couponId) {
       await Coupon.findByIdAndUpdate(couponId, { $inc: { usedCount: -1 } });
+      await CouponUsage.findOneAndUpdate(
+        { coupon: couponId, user: customerId },
+        { $inc: { count: -1 } }
+      );
     }
     throw error;
   }
@@ -308,10 +330,16 @@ export const cancelOrder = async (orderId: string, userId: string) => {
 
   // Rollback coupon usage if a coupon was used
   if (order.couponCode) {
-    await Coupon.findOneAndUpdate(
+    const coupon = await Coupon.findOneAndUpdate(
       { code: order.couponCode.toUpperCase() },
       { $inc: { usedCount: -1 } }
     );
+    if (coupon) {
+      await CouponUsage.findOneAndUpdate(
+        { coupon: coupon._id, user: userId },
+        { $inc: { count: -1 } }
+      );
+    }
   }
 
   return order.save();

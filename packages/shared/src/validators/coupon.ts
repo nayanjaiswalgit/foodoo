@@ -10,6 +10,7 @@ export const createCouponSchema = z.object({
   validFrom: z.string().datetime(),
   validUntil: z.string().datetime(),
   usageLimit: z.number().int().positive(),
+  maxUsagePerUser: z.number().int().min(0).default(0),
   restaurant: z.string().optional(),
 });
 

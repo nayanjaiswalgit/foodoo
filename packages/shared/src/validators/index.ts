@@ -5,6 +5,8 @@ export {
   verifyOtpSchema,
   refreshTokenSchema,
   updateProfileSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
 } from './auth';
 export type {
   RegisterInput,
@@ -12,6 +14,8 @@ export type {
   SendOtpInput,
   VerifyOtpInput,
   UpdateProfileInput,
+  ForgotPasswordInput,
+  ResetPasswordInput,
 } from './auth';
 
 export { createRestaurantSchema, updateRestaurantSchema } from './restaurant';

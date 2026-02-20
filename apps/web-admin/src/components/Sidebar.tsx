@@ -27,6 +27,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/users', label: 'Users', icon: '👥', roles: [UserRole.SUPER_ADMIN] },
   { to: '/restaurants', label: 'Restaurants', icon: '🏪', roles: [UserRole.SUPER_ADMIN] },
   { to: '/feature-flags', label: 'Feature Flags', icon: '🚩', roles: [UserRole.SUPER_ADMIN] },
+  { to: '/audit-logs', label: 'Audit Logs', icon: '📜', roles: [UserRole.SUPER_ADMIN] },
 ];
 
 export function Sidebar() {

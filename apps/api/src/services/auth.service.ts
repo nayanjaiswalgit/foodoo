@@ -150,3 +150,45 @@ export const refreshToken = async (token: string) => {
 export const logout = async (userId: string) => {
   await User.findByIdAndUpdate(userId, { refreshToken: undefined });
 };
+
+export const forgotPassword = async (email: string) => {
+  const user = await User.findOne({ email });
+  if (!user) {
+    // Don't reveal whether the email exists
+    return;
+  }
+
+  const token = crypto.randomBytes(32).toString('hex');
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+  const expiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+  await User.findByIdAndUpdate(user._id, {
+    resetPasswordToken: hashedToken,
+    resetPasswordExpiry: expiry,
+  });
+
+  if (env.NODE_ENV === 'development') {
+    const resetUrl = `${env.CLIENT_URL}/reset-password?token=${token}`;
+    console.log(`Password reset link for ${email}: ${resetUrl}`);
+  }
+  // In production, send email with reset link
+};
+
+export const resetPassword = async (token: string, newPassword: string) => {
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+  const user = await User.findOne({
+    resetPasswordToken: hashedToken,
+    resetPasswordExpiry: { $gt: new Date() },
+  }).select('+resetPasswordToken +resetPasswordExpiry');
+
+  if (!user) {
+    throw ApiError.badRequest('Invalid or expired reset token');
+  }
+
+  user.passwordHash = newPassword; // pre-save hook will hash it
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpiry = undefined;
+  user.refreshToken = undefined; // invalidate existing sessions
+  await user.save();
+};

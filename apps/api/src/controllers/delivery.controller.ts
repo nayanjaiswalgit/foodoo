@@ -1,5 +1,5 @@
 import { type Request, type Response } from 'express';
-import { asyncHandler, sendResponse } from '../utils/index';
+import { asyncHandler, sendResponse, sendPaginatedResponse } from '../utils/index';
 import * as deliveryService from '../services/delivery.service';
 
 export const register = asyncHandler(async (req: Request, res: Response) => {
@@ -39,4 +39,11 @@ export const completeDelivery = asyncHandler(async (req: Request, res: Response)
 export const getEarnings = asyncHandler(async (req: Request, res: Response) => {
   const earnings = await deliveryService.getEarnings(req.user!._id);
   sendResponse(res, 200, earnings);
+});
+
+export const getEarningsHistory = asyncHandler(async (req: Request, res: Response) => {
+  const page = Number(req.query.page) || 1;
+  const limit = Math.min(Number(req.query.limit) || 20, 50);
+  const { earnings, total } = await deliveryService.getEarningsHistory(req.user!._id, page, limit);
+  sendPaginatedResponse(res, earnings, { page, limit, total });
 });

@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { adminApi } from '../services/admin.service';
 import { useAuthStore } from '../stores/auth.store';
 
@@ -18,7 +18,7 @@ export function LoginPage() {
 
     try {
       const result = await adminApi.login({ email, password });
-      setTokens(result.tokens.accessToken, result.tokens.refreshToken);
+      setTokens(result.tokens.accessToken);
       setUser(result.user);
       navigate('/');
     } catch {
@@ -61,6 +61,15 @@ export function LoginPage() {
               placeholder="Enter password"
               required
             />
+          </div>
+
+          <div className="text-right">
+            <Link
+              to="/forgot-password"
+              className="text-sm text-orange-500 hover:text-orange-600 font-medium"
+            >
+              Forgot password?
+            </Link>
           </div>
 
           <button

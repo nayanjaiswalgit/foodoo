@@ -16,6 +16,8 @@ export interface IUserDocument extends Document {
   isVerified: boolean;
   isActive: boolean;
   refreshToken?: string;
+  resetPasswordToken?: string;
+  resetPasswordExpiry?: Date;
   comparePassword(password: string): Promise<boolean>;
 }
 
@@ -34,6 +36,8 @@ const userSchema = new Schema<IUserDocument>(
     isVerified: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
     refreshToken: { type: String, select: false },
+    resetPasswordToken: { type: String, select: false },
+    resetPasswordExpiry: { type: Date, select: false },
   },
   { timestamps: true }
 );
@@ -57,6 +61,8 @@ userSchema.set('toJSON', {
     delete ret.otp;
     delete ret.otpExpiry;
     delete ret.refreshToken;
+    delete ret.resetPasswordToken;
+    delete ret.resetPasswordExpiry;
     delete ret.__v;
     return ret;
   },

@@ -8,7 +8,7 @@ export type {
   IOperatingHours,
 } from './restaurant';
 export type { IOrder, IOrderItem, IOrderPricing, IStatusHistoryEntry } from './order';
-export type { IDeliveryPartner } from './delivery';
+export type { IDeliveryPartner, IDeliveryEarning } from './delivery';
 export type { IReview } from './review';
 export type { ICoupon } from './coupon';
 export type { ApiResponse, PaginatedResponse, ApiError } from './api';

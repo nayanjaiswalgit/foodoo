@@ -10,6 +10,7 @@ export interface ICoupon {
   validUntil: string;
   usageLimit: number;
   usedCount: number;
+  maxUsagePerUser: number;
   isActive: boolean;
   restaurant?: string;
   createdAt: string;

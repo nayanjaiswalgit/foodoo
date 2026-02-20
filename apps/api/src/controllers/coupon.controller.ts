@@ -3,7 +3,7 @@ import { asyncHandler, sendResponse } from '../utils/index';
 import * as couponService from '../services/coupon.service';
 
 export const validate = asyncHandler(async (req: Request, res: Response) => {
-  const result = await couponService.validateCoupon(req.body);
+  const result = await couponService.validateCoupon(req.body, req.user?._id);
   sendResponse(res, 200, result);
 });
 

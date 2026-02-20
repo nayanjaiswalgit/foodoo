@@ -13,5 +13,6 @@ router.get('/available-orders', deliveryController.getAvailableOrders);
 router.post('/accept/:orderId', deliveryController.acceptOrder);
 router.post('/complete/:orderId', deliveryController.completeDelivery);
 router.get('/earnings', deliveryController.getEarnings);
+router.get('/earnings/history', deliveryController.getEarningsHistory);
 
 export { router as deliveryRoutes };

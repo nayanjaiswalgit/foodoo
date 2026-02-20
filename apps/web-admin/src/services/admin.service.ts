@@ -28,4 +28,7 @@ export const adminApi = {
 
   toggleFeatureFlag: (key: string) =>
     apiClient.patch(`/admin/feature-flags/${key}`).then((r) => r.data.data),
+
+  getAuditLogs: (page = 1, limit = 20, filters?: { action?: string; targetType?: string }) =>
+    apiClient.get('/admin/audit-logs', { params: { page, limit, ...filters } }).then((r) => r.data),
 };

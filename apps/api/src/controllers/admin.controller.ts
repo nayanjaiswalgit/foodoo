@@ -2,6 +2,7 @@ import { type Request, type Response } from 'express';
 import { asyncHandler, sendResponse, sendPaginatedResponse } from '../utils/index';
 import * as adminService from '../services/admin.service';
 import * as featureFlagService from '../services/feature-flag.service';
+import * as auditLogService from '../services/audit-log.service';
 
 export const getDashboard = asyncHandler(async (_req: Request, res: Response) => {
   const data = await adminService.getDashboard();
@@ -16,7 +17,7 @@ export const listUsers = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const toggleUserActive = asyncHandler(async (req: Request, res: Response) => {
-  const user = await adminService.toggleUserActive(req.params.id as string, req.user!._id);
+  const user = await adminService.toggleUserActive(req.params.id as string, req.user!._id, req.ip);
   sendResponse(res, 200, user);
 });
 
@@ -28,14 +29,20 @@ export const listRestaurants = asyncHandler(async (req: Request, res: Response) 
 });
 
 export const toggleRestaurantActive = asyncHandler(async (req: Request, res: Response) => {
-  const restaurant = await adminService.toggleRestaurantActive(req.params.id as string);
+  const restaurant = await adminService.toggleRestaurantActive(
+    req.params.id as string,
+    req.user!._id,
+    req.ip
+  );
   sendResponse(res, 200, restaurant);
 });
 
 export const updateCommission = asyncHandler(async (req: Request, res: Response) => {
   const restaurant = await adminService.updateCommission(
     req.params.id as string,
-    req.body.commission
+    req.body.commission,
+    req.user!._id,
+    req.ip
   );
   sendResponse(res, 200, restaurant, 'Commission updated');
 });
@@ -48,4 +55,16 @@ export const getFeatureFlags = asyncHandler(async (_req: Request, res: Response)
 export const toggleFeatureFlag = asyncHandler(async (req: Request, res: Response) => {
   const flag = await featureFlagService.toggleFlag(req.params.key as any, req.user!._id);
   sendResponse(res, 200, flag);
+});
+
+export const getAuditLogs = asyncHandler(async (req: Request, res: Response) => {
+  const page = Number(req.query.page) || 1;
+  const limit = Math.min(Number(req.query.limit) || 20, 50);
+  const filters = {
+    action: req.query.action as string | undefined,
+    targetType: req.query.targetType as string | undefined,
+    adminId: req.query.adminId as string | undefined,
+  };
+  const { logs, total } = await auditLogService.getAuditLogs(page, limit, filters);
+  sendPaginatedResponse(res, logs, { page, limit, total });
 });

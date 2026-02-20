@@ -81,7 +81,7 @@ export default defineConfig([
 
   // ── Config / script files at repo root (JS, CJS, MJS) ────────────────────
   {
-    files: ['*.config.{js,mjs,cjs}', '*.config.ts', 'turbo.json'],
+    files: ['*.config.{js,mjs,cjs}', '*.config.ts'],
     languageOptions: {
       globals: {
         ...globals.node,

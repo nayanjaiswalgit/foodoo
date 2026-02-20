@@ -5,6 +5,8 @@ import {
   sendOtpSchema,
   verifyOtpSchema,
   refreshTokenSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
 } from '@food-delivery/shared';
 import { validate } from '../middleware/validate.middleware';
 import { authenticate } from '../middleware/auth.middleware';
@@ -19,5 +21,17 @@ router.post('/send-otp', otpLimiter, validate(sendOtpSchema), authController.sen
 router.post('/verify-otp', otpLimiter, validate(verifyOtpSchema), authController.verifyOtp);
 router.post('/refresh-token', validate(refreshTokenSchema), authController.refreshToken);
 router.post('/logout', authenticate, authController.logout);
+router.post(
+  '/forgot-password',
+  authLimiter,
+  validate(forgotPasswordSchema),
+  authController.forgotPassword
+);
+router.post(
+  '/reset-password',
+  authLimiter,
+  validate(resetPasswordSchema),
+  authController.resetPassword
+);
 
 export { router as authRoutes };

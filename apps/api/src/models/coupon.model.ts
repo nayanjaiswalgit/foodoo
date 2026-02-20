@@ -11,6 +11,7 @@ export interface ICouponDocument extends Document {
   validUntil: Date;
   usageLimit: number;
   usedCount: number;
+  maxUsagePerUser: number;
   isActive: boolean;
   restaurant?: mongoose.Types.ObjectId;
 }
@@ -27,6 +28,7 @@ const couponSchema = new Schema<ICouponDocument>(
     validUntil: { type: Date, required: true },
     usageLimit: { type: Number, required: true },
     usedCount: { type: Number, default: 0 },
+    maxUsagePerUser: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
     restaurant: { type: Schema.Types.ObjectId, ref: 'Restaurant' },
   },

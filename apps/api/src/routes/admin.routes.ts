@@ -12,6 +12,7 @@ router.patch('/users/:id/toggle', adminController.toggleUserActive);
 router.get('/restaurants', adminController.listRestaurants);
 router.patch('/restaurants/:id/toggle', adminController.toggleRestaurantActive);
 router.patch('/restaurants/:id/commission', adminController.updateCommission);
+router.get('/audit-logs', adminController.getAuditLogs);
 router.get('/feature-flags', adminController.getFeatureFlags);
 router.patch('/feature-flags/:key', adminController.toggleFeatureFlag);
 

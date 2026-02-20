@@ -6,6 +6,7 @@ export const apiClient = axios.create({
   baseURL: API_URL,
   timeout: 15000,
   headers: { 'Content-Type': 'application/json' },
+  withCredentials: true,
 });
 
 apiClient.interceptors.request.use((config) => {
@@ -25,20 +26,19 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const refreshToken = localStorage.getItem('refreshToken');
-        if (!refreshToken) throw new Error('No refresh token');
-
-        const { data } = await axios.post(`${API_URL}/auth/refresh-token`, { refreshToken });
-        const { accessToken, refreshToken: newRefresh } = data.data.tokens;
+        const { data } = await axios.post(
+          `${API_URL}/auth/refresh-token`,
+          {},
+          { withCredentials: true }
+        );
+        const { accessToken } = data.data.tokens;
 
         localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('refreshToken', newRefresh);
 
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return apiClient(originalRequest);
       } catch {
         localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
         window.location.href = '/login';
         return Promise.reject(error);
       }
