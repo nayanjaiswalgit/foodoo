@@ -14,6 +14,7 @@ import { UsersPage } from './pages/UsersPage';
 import { RestaurantsPage } from './pages/RestaurantsPage';
 import { FeatureFlagsPage } from './pages/FeatureFlagsPage';
 import { AuditLogPage } from './pages/AuditLogPage';
+import { CouponsPage } from './pages/CouponsPage';
 import { ReviewsPage } from './pages/ReviewsPage';
 
 export default function App() {
@@ -38,6 +39,7 @@ export default function App() {
             <Route element={<AdminLayout />}>
               <Route path="/users" element={<UsersPage />} />
               <Route path="/restaurants" element={<RestaurantsPage />} />
+              <Route path="/coupons" element={<CouponsPage />} />
               <Route path="/feature-flags" element={<FeatureFlagsPage />} />
               <Route path="/audit-logs" element={<AuditLogPage />} />
             </Route>
