@@ -181,37 +181,29 @@ export const getEarnings = async (userId: string) => {
 
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  const [todayEarnings, weekEarnings, monthEarnings] = await Promise.all([
+  const breakdownGroup = {
+    _id: null,
+    total: { $sum: '$totalEarning' },
+    count: { $sum: 1 },
+    baseFee: { $sum: '$baseFee' },
+    distanceBonus: { $sum: '$distanceBonus' },
+    tipAmount: { $sum: '$tipAmount' },
+  };
+
+  const [todayEarnings, weekEarnings, monthEarnings, allTimeBreakdown] = await Promise.all([
     DeliveryEarning.aggregate([
       { $match: { partner: partner.user, createdAt: { $gte: todayStart } } },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: '$totalEarning' },
-          count: { $sum: 1 },
-        },
-      },
+      { $group: breakdownGroup },
     ]),
     DeliveryEarning.aggregate([
       { $match: { partner: partner.user, createdAt: { $gte: weekStart } } },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: '$totalEarning' },
-          count: { $sum: 1 },
-        },
-      },
+      { $group: breakdownGroup },
     ]),
     DeliveryEarning.aggregate([
       { $match: { partner: partner.user, createdAt: { $gte: monthStart } } },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: '$totalEarning' },
-          count: { $sum: 1 },
-        },
-      },
+      { $group: breakdownGroup },
     ]),
+    DeliveryEarning.aggregate([{ $match: { partner: partner.user } }, { $group: breakdownGroup }]),
   ]);
 
   return {
@@ -224,6 +216,10 @@ export const getEarnings = async (userId: string) => {
     weekEarnings: weekEarnings[0]?.total ?? 0,
     monthDeliveries: monthEarnings[0]?.count ?? 0,
     monthEarnings: monthEarnings[0]?.total ?? 0,
+    basePay: allTimeBreakdown[0]?.baseFee ?? 0,
+    distanceBonus: allTimeBreakdown[0]?.distanceBonus ?? 0,
+    tips: allTimeBreakdown[0]?.tipAmount ?? 0,
+    surgeBonus: 0,
   };
 };
 
